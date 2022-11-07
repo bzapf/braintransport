@@ -7,7 +7,7 @@ import argparse
 import scipy
 from scipy import stats
 from definitions import groups, resultfoldername, labels
-from helpers import get_data_in_intervals, significance_bar
+from helpers import get_data_in_intervals, significance_bar, intervals
 
 
 
@@ -71,18 +71,17 @@ os.makedirs(plotpath, exist_ok=True)
 for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmol)', 'tracer in gray (mmol)', 'tracer in white (mmol)', r'tracer at surface (mmol/m)']):
 
 
-    fig1 = plt.figure()
-    ax1 = fig1.gca()
+    # fig1 = plt.figure()
+    # ax1 = fig1.gca()
 
-    fig2 = plt.figure()
-    ax2 = fig2.gca()
+    # fig2 = plt.figure()
+    # ax2 = fig2.gca()
 
-    fig3 = plt.figure()
-    ax3 = fig3.gca()
+    # fig3 = plt.figure()
+    # ax3 = fig3.gca()
 
-    boundary_dict = {}
-
-
+    tracer_dict = {}
+    avg_tracer_dict = {}
 
     for pat in pats:
 
@@ -119,7 +118,8 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
 
         assert max(t) < 2.5 * 24 * 3600
 
-        avgds = exceltable[roi] * v
+        total_tracer = exceltable[roi] * v
+        average_tracer = exceltable[roi]
 
         if pat in sleepers:
             c = "blue"
@@ -127,7 +127,9 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
         else:
             c = "red"
 
-        ts, avgs_ds_at_ts = get_data_in_intervals(pat, stored_times=t, stored_data=avgds)
+        ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer)
+        _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer)
+
 
         # if normalize:
         #     normalization_concst = np.trapz(y=avgs_ds_at_ts, x=ts)
@@ -135,21 +137,51 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
 
         # print(pat, ts, avgs_ds_at_ts)
 
-        boundary_dict[pat] = avgs_ds_at_ts
+        tracer_dict[pat] = tracer_at_times
 
         if pat in sleepers:
-            boundary_dict[pat] = boundary_dict[pat] + ["sleep"]
+            tracer_dict[pat] = tracer_dict[pat] + ["sleep"]
         else:
-            boundary_dict[pat] = boundary_dict[pat] + ["no sleep"]
+            tracer_dict[pat] = tracer_dict[pat] + ["no sleep"]
 
-        ax2.plot(ts, avgs_ds_at_ts, linewidth=0, color=c, marker="o")
+        avg_tracer_dict[pat] = avg_tracer_at_times
 
-        ax1.plot(t / 3600, avgds, linewidth=1, marker="x", color=c)
+        if pat in sleepers:
+            avg_tracer_dict[pat] = avg_tracer_dict[pat] + ["sleep"]
+        else:
+            avg_tracer_dict[pat] = avg_tracer_dict[pat] + ["no sleep"]
 
-    patdf = pd.DataFrame.from_dict(boundary_dict).transpose()
+    patdf = pd.DataFrame.from_dict(tracer_dict).transpose()
+
+    avg_tracer_dict= pd.DataFrame.from_dict(avg_tracer_dict).transpose()
 
     if type(patdf.iloc[0, patdf.columns[-1]]) is str:
         patdf = patdf.loc[:, :(patdf.columns[-1]-1)]
+    
+    if type(avg_tracer_dict.iloc[0, avg_tracer_dict.columns[-1]]) is str:
+        avg_tracer_dict = avg_tracer_dict.loc[:, :(avg_tracer_dict.columns[-1]-1)]
+
+    print("------------------------------------------------------------------------------")
+    print("Total amount of tracer in brain, averaged over all subjects:")
+    for i in range(1, 4):
+        y = patdf[i]
+
+        avg_tracer_at_i = avg_tracer_dict[i]
+
+        mean, std = np.nanmean(y), np.nanstd(y)
+
+
+        print("time", intervals[i], "total tracer  ", format(mean, ".2f"),  "pm", format(std, ".2f"), "mmol", 
+            "(", format(mean * 100 / 0.5, ".0f"),  "pm", format(std * 100 / 0.5, ".0f"), " percent)")
+    
+        mean, std = np.nanmean(avg_tracer_at_i), np.nanstd(avg_tracer_at_i)
+        print("time", intervals[i], "average tracer", format(mean, ".2f"),  "pm", format(std, ".2f"), "mmol / L", )
+    
+    # breakpoint()
+
+    print("------------------------------------------------------------------------------")
+
+    exit()
 
     sleep_means = np.mean(patdf.loc[sleepers, :], axis=0)
     nosleep_means = np.mean(patdf.loc[nonsleep, :], axis=0)
