@@ -1,11 +1,15 @@
 import os
-from definitions import intervals
+# from definitions import intervals
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import interpolate
+from matplotlib.markers import TICKDOWN
 
-def get_data_in_intervals(pat, stored_times, stored_data):
+
+print_messages = []
+
+def get_data_in_intervals(pat, stored_times, stored_data, intervals):
 
     data = []
     ts = []
@@ -18,16 +22,25 @@ def get_data_in_intervals(pat, stored_times, stored_data):
                 ts.append(ti / 3600)
                 data.append(datapoint)
                 break
+        
         if not len(ts) == (idy + 1):
             ts.append(np.nan)
             data.append(np.nan)
-            print("No data available in interval", intervals[idy], "for", pat, ", appending nan")
+
+            print_message = str("No data available in interval" + str(intervals[idy]) + " for " + str(pat) + ", appending nan")
+
+            if print_message not in print_messages:
+                print(print_message)
+
+                print_messages.append(print_message)
+
+        # print(len(print_messages))
 
     return ts, data
 
 
 
-from matplotlib.markers import TICKDOWN
+
 
 def significance_bar(start, end, height, fontsize, displaystring, text_dh, linewidth=1., markersize=5, color='k'):
     assert start != end

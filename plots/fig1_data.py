@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import argparse
 import scipy
 from scipy import stats
-from definitions import groups, resultfoldername, labels
-from helpers import get_data_in_intervals, significance_bar, intervals
+from definitions import groups, resultfoldername, labels, intervals
+from helpers import get_data_in_intervals, significance_bar
 
 
 
@@ -127,8 +127,8 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
         else:
             c = "red"
 
-        ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer)
-        _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer)
+        ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer, intervals=intervals)
+        _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer, intervals=intervals)
 
 
         # if normalize:

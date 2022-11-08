@@ -2,6 +2,15 @@ import os
 import json
 import pathlib
 
+intervals = [
+    # (0, 0.001),
+    (1.2, 2.6), 
+    (4.5, 7.4), (20, 30), (40, 56)
+]
+
+labels = [# r"0", 
+            r"$\sim$2", r"$\sim$6", r"$\sim$24", r"$\sim$48"]
+
 groups = {}
 
 sleep = ["105", "175", "176", "178", "183", "190", "191", "205", "215", "218", "228", "240"]
@@ -33,8 +42,7 @@ pats = ['002','078','091','105','127','172','175','176','178','183','190','191',
 
 # print(pats)
 
-labels = [# r"0", 
-            r"$\sim$2", r"$\sim$6", r"$\sim$24", r"$\sim$48"]
+
 
 
 nonconverged = ["091", "105", "172", "175", "176", "178", "190", "191", "235", "249"]
@@ -107,11 +115,7 @@ def reaction_resultfolder(pat, best=True, k=None, subfoldername="avgDTIavgT1"):
     return return_folder
 
 
-intervals = [
-    # (0, 0.001),
-    (1.2, 2.6), 
-    (4.5, 7.4), (20, 30), (40, 56)
-]
+
 
 
 

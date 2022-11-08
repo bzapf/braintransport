@@ -44,19 +44,19 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
             if average_tracer:
                 roi_volume = 1e-6
 
-            experimental = pd.read_csv(folder + 'experimental_data.csv') * roi_volume
-            concs = pd.read_csv(folder + 'concs.csv') * roi_volume
+            experimental = pd.read_csv(folder + 'experimental_data.csv')
+            concs = pd.read_csv(folder + 'concs.csv') 
             
             simulation_times = concs['t'] # / 3600
-            simulated_tracer = concs[region] 
+            simulated_tracer = concs[region] * roi_volume
 
             assert max(np.abs(simulated_tracer)) < 1
             
             experimental_times = experimental['t'] # / 3600
-            measured_tracer = experimental[region]
+            measured_tracer = experimental[region] * roi_volume
 
-            _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=experimental_times, stored_data=measured_tracer)
-            _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simulation_times, stored_data=simulated_tracer)
+            _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=experimental_times, stored_data=measured_tracer, intervals=intervals)
+            _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simulation_times, stored_data=simulated_tracer, intervals=intervals)
 
             conc_experimental[:, pat_no] = measured_tracer_at_times
             conc_simulated[:, pat_no, alpha_idx] = simulated_tracer_at_times   
