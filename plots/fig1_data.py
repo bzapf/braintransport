@@ -162,7 +162,7 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
         avg_tracer_dict = avg_tracer_dict.loc[:, :(avg_tracer_dict.columns[-1]-1)]
 
     print("------------------------------------------------------------------------------")
-    print("Total amount of tracer in brain, averaged over all subjects:")
+    print("Total amount of tracer in " + roi + ", averaged over all subjects:")
     for i in range(1, 4):
         y = patdf[i]
 
@@ -171,7 +171,7 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
         mean, std = np.nanmean(y), np.nanstd(y)
 
 
-        print("time", intervals[i], "total tracer  ", format(mean, ".2f"),  "pm", format(std, ".2f"), "mmol", 
+        print("time", intervals[i], "total tracer  ", format(mean, ".4f"),  "pm", format(std, ".4f"), "mmol", 
             "(", format(mean * 100 / 0.5, ".0f"),  "pm", format(std * 100 / 0.5, ".0f"), " percent)")
     
         mean, std = np.nanmean(avg_tracer_at_i), np.nanstd(avg_tracer_at_i)
@@ -181,7 +181,7 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
 
     print("------------------------------------------------------------------------------")
 
-    exit()
+    # exit()
 
     sleep_means = np.mean(patdf.loc[sleepers, :], axis=0)
     nosleep_means = np.mean(patdf.loc[nonsleep, :], axis=0)
@@ -224,7 +224,7 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
         if p >= 0.05 and only_significant:
             # displaystring = "$p$=" + format(p, ".2f")
             displaystring = "n.s."
-            print("continue")
+            # print("continue")
             continue
 
         elif p < 0.0001:

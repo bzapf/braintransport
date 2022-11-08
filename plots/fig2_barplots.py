@@ -50,10 +50,17 @@ fs = None
 
 paperformat = True
 
+plot_avg_tracer = False
 
 for region in ["avg", "white", "gray"]:
+
+
     print(region)
 
     make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, 
-                savepath=plotpath + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi)
+                savepath=plotpath + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
 
+    # exit()
+
+    print("---------------------------------------------------------------------------------------------------------------")
+    print("---------------------------------------------------------------------------------------------------------------")
