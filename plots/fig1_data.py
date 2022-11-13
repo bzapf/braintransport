@@ -55,7 +55,8 @@ fontsize = None
 
 
 def stderr(x, axis): 
-    return stats.sem(x, axis=axis, nan_policy="omit")
+    return np.nanstd(x, axis=axis)
+    # return stats.sem(x, axis=axis, nan_policy="omit")
 
 
 
@@ -130,21 +131,14 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
         ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer, intervals=intervals)
         _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer, intervals=intervals)
 
-
-        # if normalize:
-        #     normalization_concst = np.trapz(y=avgs_ds_at_ts, x=ts)
-        #     avgs_ds_at_ts = [x / normalization_concst for x in avgs_ds_at_ts]
-
-        # print(pat, ts, avgs_ds_at_ts)
-
-        tracer_dict[pat] = tracer_at_times
+        tracer_dict[pat] = tracer_at_times.tolist()
 
         if pat in sleepers:
             tracer_dict[pat] = tracer_dict[pat] + ["sleep"]
         else:
             tracer_dict[pat] = tracer_dict[pat] + ["no sleep"]
 
-        avg_tracer_dict[pat] = avg_tracer_at_times
+        avg_tracer_dict[pat] = avg_tracer_at_times.tolist()
 
         if pat in sleepers:
             avg_tracer_dict[pat] = avg_tracer_dict[pat] + ["sleep"]
@@ -170,18 +164,13 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
 
         mean, std = np.nanmean(y), np.nanstd(y)
 
-
         print("time", intervals[i], "total tracer  ", format(mean, ".4f"),  "pm", format(std, ".4f"), "mmol", 
             "(", format(mean * 100 / 0.5, ".0f"),  "pm", format(std * 100 / 0.5, ".0f"), " percent)")
     
         mean, std = np.nanmean(avg_tracer_at_i), np.nanstd(avg_tracer_at_i)
         print("time", intervals[i], "average tracer", format(mean, ".2f"),  "pm", format(std, ".2f"), "mmol / L", )
     
-    # breakpoint()
-
     print("------------------------------------------------------------------------------")
-
-    # exit()
 
     sleep_means = np.mean(patdf.loc[sleepers, :], axis=0)
     nosleep_means = np.mean(patdf.loc[nonsleep, :], axis=0)
@@ -222,9 +211,7 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
     for i, p in enumerate(pval):
         
         if p >= 0.05 and only_significant:
-            # displaystring = "$p$=" + format(p, ".2f")
             displaystring = "n.s."
-            # print("continue")
             continue
 
         elif p < 0.0001:
@@ -281,7 +268,7 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
     if "surface" in ylabel or "ds" in ylabel:
         ax.set_ylim(0, 0.07)
     else:
-        ax.set_ylim(0, 0.16)
+        ax.set_ylim(0, 0.18)
 
     if argparse_dict["ylim"] is not None:
         ax.set_ylim(0, argparse_dict["ylim"])

@@ -3,20 +3,20 @@ import os
 import matplotlib.pyplot as plt
 import json
 import argparse
-
+import pickle
 import scipy
 from scipy import stats
 import pandas
 
 from correlationplot import correlationplot
-from helpers import get_data_in_intervals, intervals
-from definitions import labels as data_labels, groups
+from helpers import get_data_in_intervals
+from definitions import labels as data_labels, groups, intervals
 from helpers import load_experimental_data, load_simulation_data
 
 def stderr(x, axis): 
     return stats.sem(x, axis=axis, nan_policy="omit")
 
-def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames, labels=None, savepath=None, 
+def method_barplots(parameters, roi, pats, path_to_files, resultfoldernames, labels=None, savepath=None, 
         savedpi=300, figsize=(6, 5), legendfs=12, 
         title=False, ylabel="", ylim=None, legend_outside=True, 
         ):
@@ -35,7 +35,8 @@ def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames,
     y_data = np.zeros((len(intervals), len(pats), len(parameters)))
     datatimes = np.zeros((len(intervals), len(pats), len(parameters)))
 
-    late_times = intervals[1:]
+    print_from = 1
+    late_times = intervals[print_from:]
 
     fontsize = 16
     legendfs = min(fontsize, legendfs)
@@ -48,6 +49,22 @@ def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames,
         paths_to_plot = []
 
 
+        if roi != "avgds":
+            with open(os.path.join(path_to_files, pat, 'region_volumes32'), 'rb') as f:
+                region_volumes = pickle.load(f)
+            for r in roi:
+                if "ds" in roi:
+                    raise KeyError
+        else:
+            print("Loading surface areas")
+            assert roi == "avgds"
+            with open(os.path.join(path_to_files, pat, 'region_areas32'), 'rb') as f:
+                region_volumes = pickle.load(f)
+
+        v = region_volumes[roi] * 1e-6
+
+
+
         for param_counter, p in enumerate(parameters):
 
             subfolder = os.path.join(path_to_files, pat, "diffusion_reaction", resultfoldernames[param_counter], "k" + str(iterk), "")
@@ -57,7 +74,9 @@ def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames,
 
         for param_counter, excelpath in enumerate(paths_to_plot):
 
-            data_times, data = load_experimental_data(pat, excelpath, roi)
+            data_times, data = load_experimental_data(pat, excelpath, roi, intervals)
+
+            data *= v
 
             y_data[:, pat_counter, param_counter] = data
             datatimes[:, pat_counter, param_counter] = days * np.array(data_times) / max(data_times)
@@ -66,34 +85,26 @@ def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames,
                 continue
 
             simtimes, simdata = load_simulation_data(pat, excelpath=os.path.join(excelpath, "concs_plain.csv"), roi=roi)
-                
+            
+            simdata *= v
+
             y_sim[:, param_counter, pat_counter] = simdata
             
             simtimes = np.array(simtimes)
+
+            _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=data_times, stored_data=data, intervals=intervals)
+            _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simtimes, stored_data=simdata, intervals=intervals)
+
+            ratios[:, pat_counter, param_counter] = (simulated_tracer_at_times / measured_tracer_at_times)[print_from:]
             
-            for idt, (t1, t2) in enumerate(late_times):
-                for idx, t in enumerate(data_times):
-                    if t1 <= t and t <= t2:
-                        # print("match", t1, t2, t)
-                        argmin = np.argmin(np.abs(t-simtimes))
-
-                        ratio = simdata[argmin] / data[idx]
-                        # print(pat, t, ratio)
-
-                        ratios[idt, pat_counter, param_counter] = ratio
-
-                        break
-
             assert len(simdata.shape) == 1
             assert simdata.shape[0] == y_sim.shape[0]
             del simtimes, simdata
 
-
     del paths_to_plot, pat_parameters
 
     print("Ratios of simulated / measured tracer")
-    # First axis is time, last axis is different T1 maps
-    # if "ds" not in regions[0]:
+
     ratios = np.nanmean(ratios, axis=1)
     print("T1 maps are", labels)
     for idt, _ in enumerate(late_times):
@@ -112,15 +123,15 @@ def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames,
 
         _, pval = scipy.stats.ttest_ind(c1, c2, axis=0, equal_var=True, nan_policy="omit")
         if pval < 0.05:
-            print("c1 vs c2, p=", pval, "(", regions[0], ")")
+            print("c1 vs c2, p=", pval, "(", roi[0], ")")
 
         _, pval = scipy.stats.ttest_ind(c2, c3, axis=0, equal_var=True, nan_policy="omit")
         if pval < 0.05:
-            print("c2 vs c3, p=", pval, "(", regions[0], ")")
+            print("c2 vs c3, p=", pval, "(", roi[0], ")")
 
         _, pval = scipy.stats.ttest_ind(c1, c3, axis=0, equal_var=True, nan_policy="omit")
         if pval < 0.05:
-            print("c1 vs c3, p=", pval, "(", regions[0], ")")
+            print("c1 vs c3, p=", pval, "(", roi[0], ")")
 
 
     ts = np.array(list(range(mean_times.shape[0])))
@@ -169,9 +180,9 @@ def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames,
     print("1-2: maximum difference at tid",  maxid12, maxdiff12, "+-", maxstd12)
     print("2-3: maximum difference at tid",  maxid23, maxdiff23, "+-", maxstd23)
 
-    if "ds" in regions[0]:
+    if "ds" in roi[0]:
         ax.set_ylim((0, 0.08))
-        if "avg" in regions[0]:
+        if "avg" in roi[0]:
             ax.set_ylim((0, 0.5))
     else:
         ax.set_ylim((0, 0.2))
@@ -196,7 +207,7 @@ def method_barplots(parameters, regions, pats, path_to_files, resultfoldernames,
     ax.xaxis.set_ticks_position('bottom')
 
     plt.tight_layout()
-    plt.savefig(plotpath + regions[0] + "concentrations.png")
+    plt.savefig(plotpath + roi[0] + "concentrations.png")
 
     # if "ds" in regions[0]:
     return y_data, y_sim, datatimes
@@ -270,9 +281,24 @@ def load_sirs(roi):
 
         exceltable = pandas.read_csv(path2sir)
 
-        _, avgsir = get_data_in_intervals(pat, stored_times=exceltable["t"], stored_data=exceltable[roi])
+        _, avgsir = get_data_in_intervals(pat, stored_times=exceltable["t"], stored_data=exceltable[roi], intervals=intervals)
 
-        sirs[:, patid, -1] = avgsir
+        if roi != "avgds":
+            with open(os.path.join(data_folder, pat, 'region_volumes' + str(32)), 'rb') as f:
+                region_volumes = pickle.load(f)
+            for r in roi:
+                if "ds" in roi:
+                    raise KeyError
+        else:
+            print("Loading surface areas")
+            assert roi == "avgds"
+            with open(os.path.join(data_folder, pat, 'region_areas' + str(32)), 'rb') as f:
+                region_volumes = pickle.load(f)
+
+        v = region_volumes[roi] * 1e-6
+
+        # breakpoint()
+        sirs[:, patid, -1] = avgsir * v
 
     return sirs
 
@@ -340,7 +366,7 @@ if __name__ == "__main__":
 
 
         y_data, y_sim, datatimes = method_barplots(parameters=[(1, 0, 0) for _ in resultfoldernames], labels=labels, resultfoldernames=resultfoldernames,
-                regions=[roi], pats=pats, legend_outside=False, ylabel=ylabel,
+                roi=roi, pats=pats, legend_outside=False, ylabel=ylabel,
                 savepath=plotpath + "compare" + roi + ".png", path_to_files=data_folder)
         
         if roi == "avg":
@@ -357,10 +383,10 @@ if __name__ == "__main__":
         fs = 22
         figsize = [6.4 * figsize_scale, figsize_scale * 4.8]
 
-        ylabel = "mmol / L"
+        ylabel = "mmol"
         
         figurename = plotpath + roi + "t1-correlation-t"
-        xlabel = "tracer (mmol / L) \n(computed with " + labels[0] + ")"
+        xlabel = "tracer (mmol) \n(computed with " + labels[0] + ")"
         
         xlim = (0, 1.2 * max(np.max(np.nan_to_num(y_data)), np.max(np.nan_to_num(y_sim))))
         ylim = xlim

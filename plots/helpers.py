@@ -14,7 +14,15 @@ def get_data_in_intervals(pat, stored_times, stored_data, intervals):
     data = []
     ts = []
 
-    assert max(stored_times) > 50 
+    if max(stored_times) < 80:
+        message = "Assuming times are in hours"
+        if message not in print_messages:
+            print(message)
+
+        print_messages.append(message)
+        
+        stored_times = stored_times * 3600
+
 
     for idy, (tmin, tmax) in enumerate(intervals):
         for idx, (ti, datapoint) in enumerate(zip(stored_times, stored_data)):
@@ -36,7 +44,10 @@ def get_data_in_intervals(pat, stored_times, stored_data, intervals):
 
         # print(len(print_messages))
 
-    return ts, data
+    assert len(data) == len(intervals)
+    assert len(ts) == len(intervals)
+
+    return np.array(ts), np.array(data)
 
 
 
@@ -54,7 +65,7 @@ def significance_bar(start, end, height, fontsize, displaystring, text_dh, linew
 
 
 
-def load_experimental_data(pat, excelpath, roi):
+def load_experimental_data(pat, excelpath, roi, intervals):
         
     exceltable = pd.read_csv(os.path.join(excelpath, "experimental_data.csv"))
     
@@ -64,7 +75,7 @@ def load_experimental_data(pat, excelpath, roi):
 
     assert max(exceltable["t"]) < 2.5 * 24 * 3600
 
-    times, data = get_data_in_intervals(pat, stored_times=exceltable["t"], stored_data=loaded_data)
+    times, data = get_data_in_intervals(pat, stored_times=exceltable["t"], stored_data=loaded_data, intervals=intervals)
 
     return times, data
 

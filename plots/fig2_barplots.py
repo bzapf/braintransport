@@ -52,13 +52,25 @@ paperformat = True
 
 plot_avg_tracer = False
 
+GREY_WHITE=False
+
+plotname = ""
+
+if GREY_WHITE:
+    plotname = "Grey-White"
+
+
+# make_barplot("avgds", pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE,
+#             savepath=None, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
+# exit()
+
 for region in ["avg", "white", "gray"]:
 
 
     print(region)
 
-    make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, 
-                savepath=plotpath + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
+    make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE,
+                savepath=plotpath + plotname + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
 
     # exit()
 

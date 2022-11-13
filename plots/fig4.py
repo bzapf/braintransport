@@ -765,10 +765,54 @@ if __name__ == "__main__":
         print("t-test, p =", format(pval, ".3f"))
 
 
-    print("mean alpha", np.mean(df["alpha"]))
-    print("mean r", np.mean(df["r_d"]))
+    print("mean alpha", format(np.mean(df["alpha"]), ".1f"), "pm", format(np.std(df["alpha"]), ".1f"))
+    print("mean r", format(np.mean(df["r_d"]), ".0f"), "pm", format(np.std(df["r_d"]), ".0f"))
 
     df.to_csv(plotpath + "dframe.csv", index=True)
+
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("Values excluding pat 091")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    
+    # breakpoint()
+    df2 = df.drop('091')
+    
+    del df
+
+    dfs = df2.loc[[x for x in sleep if x != "091"]]
+    dfsdep = df2.loc[sleepdep]
+
+    for idx, qty in enumerate(["alpha", "r_d"]):
+
+        print(qty, ",Sleep vs non sleep")
+        fac = 1
+        if qty not in ["alpha"]:
+            fac = 1
+        print(qty, "(Sleep group)            ", format(np.mean(dfs[qty] * fac), ".2f"), "+-", format(np.std(dfs[qty] * fac), ".2f"))
+        if qty not in ["alpha", "rd/rn"]:
+            print("half life", "(Sleep group)", format(np.median(r2halflife(dfs[qty])/3600), ".2f"), "+-", 
+                format(np.std(r2halflife(dfs[qty])/3600), ".2f"), "(hours)")
+
+        print(qty, "(Sleep deprivation group)", format(np.mean(dfsdep[qty] * fac), ".2f"), "+-", 
+            format(np.std(dfsdep[qty] * fac), ".2f"))
+        # r2halflife(r)
+        if qty not in ["alpha", "rd/rn"]:
+            print("half life", "(Sleep deprivation group)", format(np.median(r2halflife(dfsdep[qty])/3600), ".2f"), "+-", 
+                format(np.std(r2halflife(dfsdep[qty])/3600), ".2f"), "(hours)")
+        _, pval = scipy.stats.ttest_ind(dfs[qty], dfsdep[qty], axis=0, equal_var=True, nan_policy="omit")
+        print("t-test, p =", format(pval, ".3f"))
+
+
+    print("mean alpha", format(np.mean(df2["alpha"]), ".1f"), "pm", format(np.std(df2["alpha"]), ".1f"))
+    print("mean r", format(np.mean(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
+
+
+    del dfs
+
+
+    
 
     qtyname = "r"
 
