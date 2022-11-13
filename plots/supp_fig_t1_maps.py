@@ -67,7 +67,7 @@ def method_barplots(parameters, roi, pats, path_to_files, resultfoldernames, lab
 
         for param_counter, p in enumerate(parameters):
 
-            subfolder = os.path.join(path_to_files, pat, "diffusion_reaction", resultfoldernames[param_counter], "k" + str(iterk), "")
+            subfolder = os.path.join(path_to_files, pat, resultfoldernames[param_counter], "k" + str(iterk), "")
 
             paths_to_plot.append(subfolder)
 
@@ -350,7 +350,7 @@ if __name__ == "__main__":
             r"$\overline{T}_1$ in w/g/b",
             ]
 
-    resultfoldernames = ["avgDTI_T1", "avgDTI_filteredT1", "avgDTIavgT1"]
+    resultfoldernames = ["diffusion/avgDTI_T1", "diffusion/avgDTI_filteredT1", "diffusion/avgDTIavgT1"]
 
     regionnames = {"avg": "in brain", "avgds": "on surface"}
 

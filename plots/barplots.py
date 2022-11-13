@@ -11,12 +11,108 @@ from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.colors import LinearSegmentedColormap
 
+
+
+
+
+def make_figs(region, pats, alphas, paperformat, resultfoldername, data_folder, savepath, fs, figsize, dpi, GREY_WHITE=False, average_tracer=False):
+    n_t = 4  # number of time points
+    n_a = len(alphas)  # number of alphas
+    n_p = len(pats)  # number of patients
+    conc_simulated = np.zeros((n_t, n_p, n_a)) + np.nan
+    conc_experimental = np.zeros((n_t, n_p))  + np.nan
+
+    
+    # cmap_name = 'jet'
+    # cmap = LinearSegmentedColormap.from_list(cmap_name, colorlist, N=100)
+
+    cmap = matplotlib.colormaps["jet"].resampled(len(pats))(np.linspace(0, 1, len(pats)))
+    cmap = iter([cmap[i, :] for i in range(len(pats))])    
+
+    for pat in pats:
+
+        fig, ax = plt.subplots()
+
+        col = next(cmap)
+
+        for alpha_idx, alpha in enumerate(alphas):
+
+            resolution = 32
+        
+            # if "alphatest" in resultfoldername(pat) and not np.isnan(alpha):
+            #     folder = data_folder + str(pat) + "/" + resultfoldername(pat) + "/alpha" + str(alpha) + "/"
+            
+            # else:
+            #     assert np.isnan(alpha)
+            folder = reaction_resultfolder(pat, best=True)
+            assert folder is not None
+            assert os.path.isdir(folder)
+
+            print(folder)
+
+
+            params = json.load(open(folder + "params"))
+
+            assert params["concfolder"] == "FIGURES_CONC"
+
+            if region == "avgds":
+                with open(data_folder + str(pat) + '/region_areas' + str(resolution), 'rb') as f:
+                    region_volumes = pickle.load(f)
+                    roi_volume = region_volumes[region] / 1e6
+            else:                
+                with open(data_folder + str(pat) + '/region_volumes' + str(resolution), 'rb') as f:
+                    region_volumes = pickle.load(f)
+                    roi_volume = region_volumes[region] / 1e6
+
+            if average_tracer:
+                roi_volume = 1e-6
+
+            experimental = pd.read_csv(folder + 'experimental_data.csv')
+
+            if np.isnan(alpha):
+                concs = pd.read_csv(folder + 'concs.csv')
+            else:
+                concs = pd.read_csv(folder + 'concs_plain.csv') 
+            
+            simulation_times = concs['t'] # / 3600
+            simulated_tracer = concs[region] * roi_volume
+
+            assert max(np.abs(simulated_tracer)) < 1
+            
+            experimental_times = experimental['t'] # / 3600
+            measured_tracer = experimental[region] * roi_volume
+
+            ls = "-"
+            if np.isnan(alpha):
+                ls = "--"
+
+            plt.title(pat + " " + region)
+            ax.plot(simulation_times / 3600, simulated_tracer, linestyle=ls, color=col)
+            ax.plot(experimental_times / 3600, measured_tracer, linestyle="-", linewidth="0", marker="x", color=col)
+
+            _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=experimental_times, stored_data=measured_tracer, intervals=intervals)
+            _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simulation_times, stored_data=simulated_tracer, intervals=intervals)
+
+
+    plt.show()
+    exit()
+
+
+
+
+
+
+
+
+
 def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folder, savepath, fs, figsize, dpi, GREY_WHITE=False, average_tracer=False):
     n_t = 4  # number of time points
     n_a = len(alphas)  # number of alphas
     n_p = len(pats)  # number of patients
     conc_simulated = np.zeros((n_t, n_p, n_a)) + np.nan
     conc_experimental = np.zeros((n_t, n_p))  + np.nan
+
+    fig, ax = plt.subplots()
 
     for alpha_idx, alpha in enumerate(alphas):
         
@@ -65,8 +161,10 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
             _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=experimental_times, stored_data=measured_tracer, intervals=intervals)
             _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simulation_times, stored_data=simulated_tracer, intervals=intervals)
 
+            # if pat == "241":
+            #     breakpoint()
             conc_experimental[:, pat_no] = measured_tracer_at_times
-            conc_simulated[:, pat_no, alpha_idx] = simulated_tracer_at_times   
+            conc_simulated[:, pat_no, alpha_idx] = np.where(np.isnan(measured_tracer_at_times), np.nan, simulated_tracer_at_times)
 
             pat_no += 1
 

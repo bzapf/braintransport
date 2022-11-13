@@ -44,24 +44,12 @@ def significance_bar(start, end, height, fontsize, displaystring, text_dh, linew
              size=fontsize)
 
 
-
-
 path_to_files = "/home/basti/Dropbox (UiO)/Sleep/"
 
-
-
-
-nonsleep = [199, 227, 230, 
-    235, 236, 
-    241
-    ]
-
-from scripts.plots.definitions import groups
+from definitions import groups
 
 group = "all"
 pats = groups[group]
-# sleepers = groups["sleep"]
-# nonsleep = groups["sleepdep"]
 
 # fig1 = plt.figure()
 # ax1 = fig1.gca()

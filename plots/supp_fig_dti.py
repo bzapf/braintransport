@@ -48,7 +48,7 @@ def plot_all(parameters, regions, pats, path_to_files, resultfoldernames, labels
 
         for param_counter, p in enumerate(parameters):
 
-            subfolder = os.path.join(path_to_files, pat, "diffusion_reaction", resultfoldernames[param_counter], "k" + str(iterk), "")
+            subfolder = os.path.join(path_to_files, pat, resultfoldernames[param_counter], "k" + str(iterk), "")
 
             paths_to_plot.append(subfolder)
 
@@ -56,7 +56,7 @@ def plot_all(parameters, regions, pats, path_to_files, resultfoldernames, labels
 
         for param_counter, excelpath in enumerate(paths_to_plot):
 
-            data_times, data = load_experimental_data(pat, excelpath, roi)
+            data_times, data = load_experimental_data(pat, excelpath, roi, intervals=intervals)
 
             y_data[:, pat_counter, param_counter] = data
             datatimes[:, pat_counter, param_counter] = days * np.array(data_times) / max(data_times)
@@ -159,9 +159,6 @@ def plot_all(parameters, regions, pats, path_to_files, resultfoldernames, labels
     plt.gca().set_box_aspect(aspect=aspect)
 
     plt.ylim(0, 0.3)
-
-
-
     plt.xticks(fontsize=fs)
     plt.yticks(fontsize=fs)
     plt.xlabel("time (days)", fontsize=fs)
@@ -176,84 +173,6 @@ def plot_all(parameters, regions, pats, path_to_files, resultfoldernames, labels
     return y_data, sims_at_measurement
 
 
-
-def barploterrs(pats, savepath, path_to_files, labels, resultfoldernames):
-
-    errors = {}
-
-
-
-    for resultfoldername in resultfoldernames:
-
-        error_list = np.zeros(len(pats)) - 1e-16
-
-        for pat_counter, pat in enumerate(pats):
-            
-            paths = make_paths(pat, data_folder=path_to_files, resultfoldername=resultfoldername)
-        
-            ## Extract best parameters for every patients
-            # parameters=[(1, 0, 0), bests_p2, best_l2,],
-
-
-            conf_dict = find_config(parameters=[(1, 0, 0)], paths=paths)
-
-            assert len(conf_dict) == 1
-
-            
-            p = 2
-
-            _, relerr = lperrors(excelpath=conf_dict[list(conf_dict.keys())[0]], rel=True, integrate_err=False, p=p)
-            error_list[pat_counter] = relerr
-            errors[resultfoldername] = error_list
-
-    edti = errors["/results_final_meshfix/"]
-    emeand = errors["/results_nodti/"]
-    
-    print("mean diff in err", np.mean(np.abs(edti-emeand)))
-    print("max diff in err", np.max(np.abs(edti-emeand)))
-
-    breakpoint()
-
-    x = np.arange(len(pats)) * 2  # the label locations
-    width = 0.666666666666  # the width of the bars
-
-    ###################################
-    fig, ax = plt.subplots(figsize=(6,3), dpi=300)
-
-    dx = width
-
-    pos = [-1, 0]
-    k = 0
-
-    c_ = iter(colors)
-    l_ = iter(labels)
-
-    es = []
-
-    for key, errorlist in errors.items():
-        yi = ax.bar(x + dx * pos[k], errorlist, width, hatch=None, color=next(c_), label=next(l_))
-        k += 1
-
-    #     es.append(errorlist)
-
-    # breakpoint()
-
-    ax.legend(fontsize=fontsize,
-    bbox_to_anchor=(0.01, 0.8, 0.9, .05), loc='lower left',
-                      ncol=len(labels), # mode="expand", 
-                      borderaxespad=0)
-
-    ax.set_ylim(0.1, 0.55)
-
-    ax.set_ylabel(r"rel. $L^" + str(p) + "$-error", fontsize=fontsize)
-    ax.set_xticks(x - dx /2, pats, rotation="70", fontsize=fontsize)
-
-    fig.tight_layout()
-
-
-    savepath = figurepath + "dti_nodti.png"
-    plt.savefig(savepath)
-    
 
 
 
@@ -307,7 +226,7 @@ if __name__ == "__main__":
 
     labels = ["simulated (DTI)", r"simulated ($\overline{D}$)"]
 
-    resultfoldernames = ["DTI_filteredT1", "avgDTI_filteredT1"]
+    resultfoldernames = ["diffusion/DTI_filteredT1", "diffusion/avgDTI_filteredT1"]
 
     iterk = 144
 

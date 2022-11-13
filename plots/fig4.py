@@ -17,7 +17,7 @@ import argparse
 # from scripts.plots.read_reaction import functionalplot, alphaplot, rdrnplot
 import pathlib
 import warnings
-from barplots import make_barplot
+from barplots import make_barplot, make_figs
 
 
 
@@ -809,10 +809,7 @@ if __name__ == "__main__":
     print("mean r", format(np.mean(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
 
 
-    del dfs
-
-
-    
+    del dfs   
 
     qtyname = "r"
 
@@ -825,12 +822,28 @@ if __name__ == "__main__":
     if np.nan in alphas:
         suffix = "best"
     paperformat = True
+
+    pats.remove("091")
+
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("Creating plots excluding pat 091")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    
     
     for region in ["white", "gray"]:
+
+        # # display best vs. plain for every patient in a single plot
+        # make_figs(region, pats, alphas, paperformat, 
+        #             resultfoldername=resultfoldername, data_folder=datafolder, fs=fs,
+        #             savepath=plotpath + "barplot" + region + ".png", 
+        #             figsize=figsize,
+        #             dpi=dpi)
+
+
         make_barplot(region, pats, alphas, paperformat, 
                     resultfoldername=resultfoldername, data_folder=datafolder, fs=fs,
                     savepath=plotpath + "barplot" + region + ".png", 
                     figsize=figsize,
                     dpi=dpi)
-
-
