@@ -15,7 +15,7 @@ from matplotlib.colors import LinearSegmentedColormap
 
 
 
-def make_figs(region, pats, alphas, paperformat, resultfoldername, data_folder, savepath, fs, figsize, dpi, GREY_WHITE=False, average_tracer=False):
+def make_figs(region, pats, alphas, data_folder, average_tracer=False):
     n_t = 4  # number of time points
     n_a = len(alphas)  # number of alphas
     n_p = len(pats)  # number of patients
@@ -122,14 +122,18 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
 
             resolution = 32
         
-            if "alphatest" in resultfoldername(pat) and not np.isnan(alpha):
-                folder = data_folder + str(pat) + "/" + resultfoldername(pat) + "/alpha" + str(alpha) + "/"
+            # if "alphatest" in resultfoldername(pat) and not np.isnan(alpha):
+            #     folder = data_folder + str(pat) + "/" + resultfoldername(pat) + "/alpha" + str(alpha) + "/"
             
-            else:
-                assert np.isnan(alpha)
-                folder = reaction_resultfolder(pat, best=True)
-                assert folder is not None
-                assert os.path.isdir(folder)
+            # else:
+            #     assert np.isnan(alpha)
+            #     folder = reaction_resultfolder(pat, best=True)
+            #     assert folder is not None
+            #     assert os.path.isdir(folder)
+
+            folder = reaction_resultfolder(pat, best=True)
+
+            print(folder)
 
             params = json.load(open(folder + "params"))
 
@@ -148,7 +152,10 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
                 roi_volume = 1e-6
 
             experimental = pd.read_csv(folder + 'experimental_data.csv')
-            concs = pd.read_csv(folder + 'concs.csv') 
+            if np.isnan(alpha):
+                concs = pd.read_csv(folder + 'concs.csv')
+            else:
+                concs = pd.read_csv(folder + 'concs_plain.csv') 
             
             simulation_times = concs['t'] # / 3600
             simulated_tracer = concs[region] * roi_volume
@@ -167,6 +174,10 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
             conc_simulated[:, pat_no, alpha_idx] = np.where(np.isnan(measured_tracer_at_times), np.nan, simulated_tracer_at_times)
 
             pat_no += 1
+
+    # breakpoint()
+
+    # conc_simulated = np.where(conc_simulated < 0, 0, conc_simulated)
 
     e, st_e = np.nanmean(conc_experimental, axis=1), np.nanstd(conc_experimental, axis=1)
 

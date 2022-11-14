@@ -1,4 +1,0 @@
-success without specifying solver
-success with specifying solver
-success without specifying solver
-success with specifying solver

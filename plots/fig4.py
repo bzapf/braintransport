@@ -831,7 +831,8 @@ if __name__ == "__main__":
     print("-------------------------------------------------------------------------------------------------------------------------------------")
     print("-------------------------------------------------------------------------------------------------------------------------------------")
     
-    
+    # make_figs(region="white", pats=pats, alphas=alphas, data_folder=datafolder, average_tracer=False)
+
     for region in ["white", "gray"]:
 
         # # display best vs. plain for every patient in a single plot
