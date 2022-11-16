@@ -7,6 +7,9 @@ data/
 .vtu*
 *.pvd
 *.vtu
+*.pdf
+*.png
+*.jpeg
 raw_data
 raw_data/
 src/nets/__pycache__/
@@ -16,8 +19,8 @@ __experimental_notebooks__
 __experimental_notebooks__/
 local_notebooks
 local_notebooks/
-results
-results/
+# results
+# results/
 src/.vscode/
 .vscode*
 scripts/brain2
