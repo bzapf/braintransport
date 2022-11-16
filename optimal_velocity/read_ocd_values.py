@@ -78,14 +78,18 @@ def read_avg_phi_values(pat, pat_dir, n, t, betas, debug=False):
 #     print("# Extracted at %s (UTC)" % now)
 #     print("results_%s = " % n, results)
 
-def extract_regional_avg_phis(xh, datadir, patients):
+def extract_regional_avg_phis(xh, datadir, patients, outfilename):
 
     # xh is "0h" or "6h" or "24h"
     n = "32"  # "16" or "32", latter is probably more relevant
     beta = "1.0e-04"
+
+    outfile = open(outfilename, "w")
     
-    print("# Extracting from %d patients: " % len(patients), patients)
-    print("# Reading from %s" % datadir)
+    outfile.write("# Extracting from %d patients: " % len(patients) + " " + str(patients))
+    outfile.write("\n")
+    outfile.write("# Reading from %s" % datadir)
+    outfile.write("\n")
     now = dt.datetime.now(dt.timezone.utc)
     
     results = OrderedDict({})
@@ -94,20 +98,34 @@ def extract_regional_avg_phis(xh, datadir, patients):
         avg_phis = read_all_avg_phi_values(pat, pat_dir, n, xh, beta)
         if avg_phis:
             results[pat] = avg_phis
-    print("# n = %s, t (xh) = %s" % (n, xh))
-    print("# Successfully collected values from %s subjects" % len(results.keys()))
-    print("# Extracted at %s (UTC)" % now)
-    print("# avg |v|, avg |v|_gray, avg |v|_white, avg |v|_stem (mm/h)")
-    print("from collections import OrderedDict)
-    print("phi_averages_%s = " % xh, results)
+    outfile.write("# n = %s, t (xh) = %s" % (n, xh))
+    outfile.write("\n")
+    outfile.write("# Successfully collected values from " + str(len(results.keys())) + " subjects")
+    outfile.write("\n")
+    outfile.write("# Extracted at " + str(now) + " (UTC)")
+    outfile.write("\n")
+    outfile.write("# avg |v|, avg |v|_gray, avg |v|_white, avg |v|_stem (mm/h)")
+    outfile.write("\n")
+    
+    outfile.write("from collections import OrderedDict")
+    outfile.write("\n")
 
-def extract_div_phis(xh, datadir, patients):
+    line = "phi_averages_%s = " % xh
+    outfile.write(line + " " + str(results))
+
+def extract_div_phis(xh, datadir, patients, outfilename):
 
     n = "32"  # "16" or "32", latter is probably more relevant
     beta = "1.0e-04"
+
+    outfile = open(outfilename, "w")
     
-    print("# Extracting from %d patients: " % len(patients), patients)
-    print("# Reading from %s" % datadir)
+    line = "# Extracting from %d patients: " % len(patients)
+    outfile.write(line + " " + str(patients))
+    outfile.write("\n")
+    line = "# Reading from %s" % datadir
+    outfile.write(line)
+    outfile.write("\n")
     now = dt.datetime.now(dt.timezone.utc)
     
     results = OrderedDict({})
@@ -116,12 +134,27 @@ def extract_div_phis(xh, datadir, patients):
         div_phis = read_all_div_phi_values(pat, pat_dir, n, xh, beta)
         if div_phis:
             results[pat] = div_phis
-    print("# n = %s, t (xh) = %s" % (n, xh))
-    print("# Successfully collected values from %s subjects" % len(results.keys()))
-    print("# Extracted at %s (UTC)" % now)
-    print("# avg div(v), avg div(v)_gray, avg div(v)_white, avg div(v)_stem (1/h)")
-    print("from collections import OrderedDict)
-    print("div_phi_averages_%s = " % xh, results)
+    
+    line = "# n = %s, t (xh) = %s" % (n, xh)
+    outfile.write(line)
+    outfile.write("\n")
+
+    line = "# Successfully collected values from %s subjects" % len(results.keys())
+    outfile.write(line)
+    outfile.write("\n")
+    
+    line = "# Extracted at %s (UTC)" % now
+    outfile.write(line)
+    
+    outfile.write("\n")
+    outfile.write("# avg div(v), avg div(v)_gray, avg div(v)_white, avg div(v)_stem (1/h)")
+    outfile.write("\n")
+
+    outfile.write("from collections import OrderedDict")
+    outfile.write("\n")
+
+    line = "div_phi_averages_%s = " % xh + " " + str(results)
+    outfile.write(line)
 
 if __name__ == "__main__":
 
@@ -142,12 +175,17 @@ if __name__ == "__main__":
     # Set False -> True below, and run with:
     # python3 read_ocd_values.py 6h > results/ocd_averages_6h.py
     # python3 read_ocd_values.py 24h > results/ocd_averages_24h.py
-    xh = sys.argv[1]
-    if False:
-        extract_regional_avg_phis(xh, datadir, patients)
 
-    # OR set False -> True below, and run with:
-    # python3 read_ocd_values.py 6h > results/div_phi_averages_6h.py
-    # python3 read_ocd_values.py 24h > results/div_phi_averages_24h.py
-    if True:
-        extract_div_phis(sys.argv[1], datadir, patients)
+    for timekey in ["6h", "24h"]:
+        extract_regional_avg_phis(timekey, datadir, patients, outfilename="results/ocd_averages_" + timekey + ".py")
+        extract_div_phis(timekey, datadir, patients, outfilename="results/div_phi_averages_" + timekey + ".py")
+
+    # xh = sys.argv[1]
+    # if False:
+    #     extract_regional_avg_phis(xh, datadir, patients)
+
+    # # OR set False -> True below, and run with:
+    # # python3 read_ocd_values.py 6h > results/div_phi_averages_6h.py
+    # # python3 read_ocd_values.py 24h > results/div_phi_averages_24h.py
+    # if True:
+    #     extract_div_phis(sys.argv[1], datadir, patients)
