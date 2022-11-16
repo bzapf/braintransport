@@ -32,6 +32,7 @@ data/
 data/mri/
 data/test/
 src/torchpinns.egg-info/
+plots/check*
 __pycache__*
 local
 local/
