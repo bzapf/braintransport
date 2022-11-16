@@ -1,0 +1,84 @@
+#
+# *** WHERE ARE THE SIMULATION OUTPUTS STORED? ***
+#
+# Simulations outputs are stored per patient in
+# /cluster/projects/nn9279k/meg/modelling-sleep-deprivation-2021/
+
+# Including reduced OCD results using patient-specific DTI
+# [... modelling-sleep-deprivation-2021/results-red-ocd]$ ls
+# 105  175  178  183  190  191  199  205  215  227  228  235  236  240  241 ...
+# and reduced OCD results using average diffusion tensor values only
+# [...modelling-sleep-deprivation-2021/results-red-ocd-avg-dti]$ ls
+# 002  078  091  105  127  172  175  176  178  183  190  191  199  205  215  218  227  228  230  235  236  240  241  249 ...
+
+# Meshes are also stored in
+# /cluster/projects/nn9279k/Vegard/SleepDeprivation/Freesurfer
+#
+# *** HOW TO GENERATE SUPPLEMENTARY INFORMATION TABLES? ***
+#
+# Tables in the Supplementary Information:
+# Table S2: Overview of computational mesh characteristics
+# Table S5: Key diagnostics for the optimization-based velocity estimation algorithm 
+# Table S6: Evaluation of numerical accuracy of the estimated velocity fields ...
+#
+# are generated from misc.py operating on the above simulation output
+# directories directly.
+#
+# To generate these tables, run these commands first at Saga in the current directory
+# salloc --ntasks=1 --mem-per-cpu=8G --time=00:59:00 --account=NN9279K --qos=devel
+# source /cluster/shared/fenics/conf/fenics-2019.1.0.saga.intel.conf
+# and run 
+# python misc.py
+#
+# *** HOW TO EXTRACT AVERAGE FLOW SPEEDS and FLUID INFLUX ***
+#
+# To extract average flow speeds in different regions, and examine
+# differences between the cohorts, see the script read_ocd_values.py
+#
+# To generate these tables, run these commands first at Saga in the current directory
+# salloc --ntasks=1 --mem-per-cpu=8G --time=00:59:00 --account=NN9279K --qos=devel
+# source /cluster/shared/fenics/conf/fenics-2019.1.0.saga.intel.conf
+#
+# and then comment in/out relevant parts of __main__ in read_ocd_values.py.
+#
+#   python3 read_ocd_values.py 6h > results/ocd_averages_6h.py
+#   python3 read_ocd_values.py 24h > results/ocd_averages_24h.py
+#
+#   ... comment in/out ...
+#
+#   python3 read_ocd_values.py 6h > results/div_phi_averages_6h.py
+#   python3 read_ocd_values.py 24h > results/div_phi_averages_24h.py
+# 
+# Executing these scripts yield the data in
+# results/[ocd|div_phi]_average_[6|24]h.py which can be then used for
+# quick (local) plotting.
+#
+# *** HOW TO GENERATE AVERAGE FLOW SPEEDS and FLUID INFLUX PLOTS FOR PAPER ***
+#
+# The two scripts plot_ocd_averages.py and plot_div_phi_values.py are
+# intended for this purpose. They also output (to terminal) a bunch of
+# diagnostics that is useful for the text.
+#
+# Run:
+# 
+#   python3 plot_ocd_averages.py
+#   python3 plot_ocd_averages.py | tee results/plot_ocd_averages.tee # Alternative
+# 
+# to generate the average flow speed bar plots (in
+# results/graphics/figure_ocd_average_[6|24h].pdf.
+#
+# This script also outputs LaTex-formatted tables of average regional
+# flow speeds for each patient for each time interval (can then be
+# copy-pasted to Supplementary Information, Table X)
+#
+# Similarly, run
+# 
+#   python3 plot_div_phi_values.py
+#   python3 plot_div_phi_values.py | tee resutls/plot_div_phi_values.tee # Alternative
+#
+# to generate the average fluid influx bar plot (in
+# results/graphics/figure_div_phi.pdf, and to output (to terminal) a
+# bunch of statistics useful for the manuscript text.
+#
+# To read from a different data directory, update the directory path
+# in the above scripts.
