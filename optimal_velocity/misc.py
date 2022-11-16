@@ -112,10 +112,9 @@ def analyze_optimization(csvname):
 
     return js, phi_maxs
 
-def list_avg_phi_for_all_patients(timekey, outfilename):
+def list_avg_phi_for_all_patients(timekey, outfilename, resultfoldername):
     #print("\% Extracting \bar{\phi} for all patients and simulations for from %s." % xh)
-    workdir = "/cluster/projects/nn9279k/meg/modelling-sleep-deprivation-2021/" + \
-        "results-red-ocd-avg-dti"
+    workdir = "/cluster/projects/nn9279k/meg/modelling-sleep-deprivation-2021/" + resultfoldername
     patient_dirs = glob.glob(os.path.join(workdir, "[0-9][0-9][0-9]"))
     patient_dirs.sort()
     
@@ -177,11 +176,10 @@ def list_avg_phi_for_all_patients(timekey, outfilename):
     outfile.close()
 
 
-def list_Js_for_all_patients(timekey, outfilename):
+def list_Js_for_all_patients(timekey, outfilename, resultfoldername):
 
     #print("Extracting Js for all patients and simulations.")
-    workdir = "/cluster/projects/nn9279k/meg/modelling-sleep-deprivation-2021/" + \
-        "results-red-ocd-avg-dti"
+    workdir = "/cluster/projects/nn9279k/meg/modelling-sleep-deprivation-2021/" + resultfoldername
     patient_dirs = glob.glob(os.path.join(workdir, "[0-9][0-9][0-9]"))
     patient_dirs.sort()
     
@@ -267,8 +265,11 @@ if __name__ == "__main__":
 
     for timekey in ["0h", "6h", "24h"]:
 
-        list_Js_for_all_patients(timekey, outfilename="results/tables/table_S4_" + timekey + ".tex")
-        list_avg_phi_for_all_patients(timekey, outfilename="results/tables/table_S5_" + timekey + ".tex")
+        list_Js_for_all_patients(timekey, outfilename="results/tables/table_S4_" + timekey + ".tex", 
+            resultfoldername="results-red-ocd-avg-dti")
+        list_avg_phi_for_all_patients(timekey, outfilename="results/tables/table_S5_" + timekey + ".tex", 
+            resultfoldername="results-red-ocd-avg-dti")
+
 
     # To generate table of J, max \phi etc for all patients:
     # run python3 misc.py 0h > results/tables/table_S4_0h.tex

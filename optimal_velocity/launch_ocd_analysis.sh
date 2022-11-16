@@ -5,6 +5,8 @@
 #SBATCH --time=0-00:30:00
 #SBATCH --mem-per-cpu=12G
 #SBATCH --ntasks=1
+#SBATCH -o slurmouts/%j.out
+#SBATCH -e slurmouts/%j.err
 
 ## Saga basics:
 ## 200 standard compute notes with 40 cores and 192 GiB memory each
@@ -32,6 +34,8 @@ source /cluster/shared/fenics/conf/fenics-2019.1.0.saga.intel.conf
 # SLURM_JOB_ID is given by the job number given from the Slurm system.
 workdir=${USERWORK}/modelling-sleep-deprivation-2021/jobs/${SLURM_JOB_ID}
 mkdir -pv $workdir
+# # Copy results and log back from work to project directory
+project_dir=/cluster/projects/nn9279k
 
 # Set common data-directory
 resultfoldername=dtitest
@@ -59,8 +63,7 @@ cd ${workdir}
 # Submit the script to the job queue
 time python3 $SCRIPT_NAME . ${n} > postprocess_phi_pat${patient}_n${n}_beta${beta}_at${key}.log
 
-# # Copy results and log back from work to project directory
-project_dir=/cluster/projects/nn9279k
+
 # cp -rv ${workdir}/hdf5/* ${data}/${patient}/simulations/results_red_ocd_pat${patient}_n${n}_beta${beta}_${key}/hdf5/
 # cp -v ${workdir}/pvd/* ${data}/${patient}/simulations/results_red_ocd_pat${patient}_n${n}_beta${beta}_${key}/pvd/
 cp -v ${workdir}/*.log ${data}/${patient}/simulations/results_red_ocd_pat${patient}_n${n}_beta${beta}_${key}/

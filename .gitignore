@@ -1,4 +1,5 @@
 src/nets/.vscode/
+slurmouts*
 data
 log_*.txt
 *.out

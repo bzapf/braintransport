@@ -1,0 +1,112 @@
+## AUTHOR: Marie E. Rognes (meg@simula.no), 2021-2022.
+
+## Overview of content ##
+
+# This directory contains the Python scripts:
+# compute_omt.py - Module for computing OMT field from sets of MRI-images
+# compute_ocdr.py - Module for computing OCD(R) field from sets of MRI-images
+# postprocess_omt.py - Module for postprocessing of OMT fields (div, curl, norms)
+# misc.py - Utility functions for extracting info (times, sizes) from images/meshes
+
+# In addition, the Bash scripts:
+# launch*.sh - Copy and launch parallel job for a single simulation/postprocessing
+# run_omt*.sh - Launch many parallel jobs
+
+## Dependencies ##
+
+# The scripts rely on MRI-image data (.mgz) and corresponding FEniCS
+# meshes (.h5) on a patient-patient basis. The computation of OCD(R)
+# also assumes that diffusion tensor information is available in the
+# given meshes. Assume that you have these data e.g. in the patient
+# directory 240
+
+# The scripts rely on FEniCS. FEniCS may be installed via Docker and
+# e.g. run via
+fenicsproject run
+
+# For the reduced OCD approach, we use dolfin-adjoint, see
+# http://www.dolfin-adjoint.org/en/latest/download/index.html for
+# Download and installation instruction
+# fenicsproject run quay.io/dolfinadjoint/pyadjoint:2019.1.0 #
+fenicsproject run quay.io/dolfinadjoint/pyadjoint:latest
+
+# Image processing also relies on nibabel in addition to other
+# standard scientific computing Python dependencies such as numpy.
+sudo pip3 install nibabel
+
+## How to run ##
+
+# For a given set of patient data, the compute_omt.py script can be run as 
+python3 compute_omt.py 240 16 1.0e-1 night
+
+# Or in parallel via:
+mrirun -n 2 python3 compute_omt.py 240 16 1.0e-1 night
+
+# Similarly, for OCD(R):
+mpirun -n 4 python3 compute_ocdr.py 240 16 1.0e-4 night
+
+# To run on e.g. Saga, see and use the associated launch*.sh/run*.sh
+# scripts
+
+# To allocate an interactive job (1 hour) on Saga
+salloc --ntasks=1 --mem-per-cpu=7G --time=01:00:00 --qos=devel --account=nn9279k
+
+## SIMULATIONS AND SCRIPTS FOR PAPER OUTPUTS ##
+
+# misc.py is a plug-and-play/comment-in-comment-out type of file for
+# generating a bunch of paper-targeted outputs.
+#
+# To generate the LaTeX table of meshes dimensions and sizes, see
+#
+# list_dims_for_all_patients() in misc.py.
+#
+# This function generates the file dims_per_patient.csv with the a
+# list of mesh information per patient in each row. Replace , by &,
+# add some \\, and process the 0's to get a nice LaTeX table.
+
+# To generate LaTeX tables of optimization values, see
+#
+#   list_Js_for_all_patients()
+#
+# This function generates LaTeX formatted output for inspecting
+# initial and final values of the objective functional, and control
+# value for each given time-interval (0h, 6h, 24h). Run with e.g.
+#
+# python3 misc.py 0h > table_S4_0h.tex
+# python3 misc.py 6h > table_S4_6h.tex
+# python3 misc.py 24h > table_S4_24h.tex
+#
+# The tables table_S4_*h.tex in results/ originate from here.
+
+# To generate LaTeX tables of average velocity values, see
+#
+#   list_avg_phi_for_all_patients
+#
+# This function generates LaTeX formatted output for inspecting the
+# average velocity, L2-norms of c and c1 and their relative
+# difference, for all n, beta, on each given time-interval (0h, 6h,
+#             24h). Run (after commenting in/out in misc.py) with e.g.
+#
+# python3 misc.py 0h > table_S5_0h.tex
+# python3 misc.py 6h > table_S5_6h.tex
+# python3 misc.py 24h > table_S5_24h.tex
+#
+# The tables table_S5_*h.tex in results/ originate from here.
+# 
+# For further postprocessing and extraction of results:
+# 
+# The script launch_ocd_analysis.sh calls postprocess_phi.py to launch
+# computation of phi magnitude, div, curl etc. 
+#
+# For all patients, edit and run a series of launch_ocd_analysis.sh scripts via
+# ./run_ocd_analysis.sh       
+#
+# 
+# For plotting the results e.g. for the paper, see separate scripts in results/
+#
+# The script results/plot_ocd_averages.py generates Figure 3C, as well as
+# other output associated with the Results described for OCD..
+#
+# The script results/plot_div_phi_values.py generates a comparison
+# of div(phi) for the different scenarios.
+  
