@@ -458,9 +458,6 @@ if __name__ == "__main__":
     if exportpath is not None and not exportpath.endswith("/"):
         exportpath += "/"
 
-    if params["overwrite"] and params["store"] and os.path.isdir(exportpath):
-        os.system("rm -r " + exportpath)
-
     if params["store"]:
         exportfolder = make_exportfolder(exportpath)
         params["outfolder"] = os.path.join(exportfolder, params["outfolder"])
@@ -611,8 +608,8 @@ if __name__ == "__main__":
 
         csv_e = pandas.read_csv('%s/experimental_data.txt' % context.outfolder, sep=' ', header=0)
 
-        csv_c = pandas.read_csv(context.outfolder + '/concs' + '.txt', sep=' ', header=0)
-        csv_c.to_csv(context.outfolder + '/concs' + '.csv')
+        csv_c = pandas.read_csv(context.outfolder + '/concs_plain' + '.txt', sep=' ', header=0)
+        csv_c.to_csv(context.outfolder + '/concs_plain' + '.csv')
 
         csv_e.to_csv('%s/experimental_data.csv' % context.outfolder)
 

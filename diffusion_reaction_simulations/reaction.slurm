@@ -107,8 +107,8 @@ ls ${workdir}
 
 mkdir -p /cluster/projects/nn9279k/bastian/SleepData/$1/$outfolder/
 
-srun -n 12 python3 ${SCRIPT_NAME} --pat $1 --mesh parenchyma32.h5 \
---sleepdep --exportpath ${workdir} --path_to_files ${workdir} \
+srun -n 12 python3 -u ${SCRIPT_NAME} --pat $1 --mesh parenchyma32.h5 \
+--exportpath ${workdir} --path_to_files ${workdir} \
 --concfolder ${CONCFOLDER} --iter_k $2 --iters $ITERATIONS $DTIFLAG --alpha 1 \
 --outfolder ${outfolder} > log_python_srun.txt
  

@@ -6,7 +6,7 @@ import numpy
 from nibabel.affines import apply_affine
 import abc
 import os
-import datetime
+from datetime import datetime
 
 firsts = {
     "068": '20160912_080147',
