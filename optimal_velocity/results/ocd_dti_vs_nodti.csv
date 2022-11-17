@@ -1,0 +1,9 @@
+,6h,6h,24h,24h
+phi_mag_avgsavg,2.43,2.50,3.18,3.26
+phi_mag_avgsavg_gray,2.58,2.66,3.38,3.48
+phi_mag_avgsavg_white,2.19,2.27,2.92,2.99
+phi_mag_avgsavg_stem,3.53,3.34,3.20,3.03
+div_phi_avgsavg,0.95,0.95,2.67,2.72
+div_phi_avgsavg_gray,2.55,2.58,2.92,2.93
+div_phi_avgsavg_white,-1.14,-1.13,2.32,2.44
+div_phi_avgsavg_stem,3.10,2.37,3.54,3.00
