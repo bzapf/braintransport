@@ -425,11 +425,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--iter_k", type=int, default=48, help="time steps")
     parser.add_argument("--outfolder", type=str, default="outs", help="name of folder under exportpath/ to store pvd files to")
-    parser.add_argument("--overwrite", action="store_true", default=False)
     parser.add_argument("--iters", default=20, type=float, help="max iterations of lbfgs")
 
     parser.add_argument("--global", action="store_true", default=False)
-    parser.add_argument("--gray", action="store_true", default=False)
 
     parser.add_argument("--dti", action="store_true", default=False)
     parser.add_argument("--nodti", action="store_true", default=True)
@@ -444,11 +442,12 @@ if __name__ == "__main__":
 
     pat = params["pat"]
 
-    if params["gray"]:
-        assert not params["global"]
     
     if params["global"]:
         assert not params["gray"]
+    else:
+        params["gray"] = True
+        assert not params["global"]
 
     exportpath = params["exportpath"]
     if exportpath is not None:
@@ -607,7 +606,7 @@ if __name__ == "__main__":
                         g_list=g_list, data=data, outfolder=outfolder, MD=MD, Kt=Kt, dx_SD=dx_SD)
 
         print("Evaluating forward pass")
-        J_d = forward(j_d_context, write_solution=True, filename="finalstate")
+        J_d = forward(j_d_context, write_solution=True, filename="plainstate")
         params["j_d_final"] = float(J_d)
 
         csv_e = pandas.read_csv('%s/experimental_data.txt' % context.outfolder, sep=' ', header=0)
@@ -615,7 +614,6 @@ if __name__ == "__main__":
         csv_c = pandas.read_csv(context.outfolder + '/concs' + '.txt', sep=' ', header=0)
         csv_c.to_csv(context.outfolder + '/concs' + '.csv')
 
-        
         csv_e.to_csv('%s/experimental_data.csv' % context.outfolder)
 
         if store:

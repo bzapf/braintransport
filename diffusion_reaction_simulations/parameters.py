@@ -1,4 +1,4 @@
-from ufl import exp, ln
+# from ufl import exp, ln
 
 
 # def sigmoid(x):
@@ -34,13 +34,6 @@ class PositiveParam():
 
     def f_inverse(self, param):
         return param
-
-    # def f(self, delta):
-    #     return (delta) ** 2 + self.min
-
-    # def f_inverse(self, param):
-    #     return (param - self.min) ** (1 / 2)
-
 
 
 if __name__ == "__main__":

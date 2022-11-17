@@ -5,11 +5,7 @@ from pyadjoint import Block
 from pyadjoint.overloaded_function import overload_function
 
 import numpy as np
-
-try:
-    from scripts.reaction.preprocessing import preprocessing, dof_mapping_scalar
-except:
-    from preprocessing import preprocessing, dof_mapping_scalar
+from preprocessing import preprocessing, dof_mapping_scalar
 
 backend_preprocessing = preprocessing
 

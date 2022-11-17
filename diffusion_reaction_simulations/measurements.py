@@ -6,28 +6,69 @@ import numpy
 from nibabel.affines import apply_affine
 import abc
 import os
-from scipy.ndimage import gaussian_filter, median_filter
-try:
+import datetime
 
-    from scripts.simulations.run_nightly import find_files, get_delta_t
-    from scripts.plots.definitions import firsts
-    from scripts.simulations.run_nightly import Tmax
+firsts = {
+    "068": '20160912_080147',
+    "002": '20151007_075055',
+    "078": '20161031_074500',
+    "091": '20170116_074933',
+    "127": '20170925_075956',
+    "172": '20180212_081154',
+    "249": '20191111_075145',
+    "105": '20170508_081611',
+    "175": '20180416_080959',
+    "176": '20180514_080612',
+    "178": '20180430_075417',
+    "183": '20181029_074933',
+    "190": '20180528_074812',
+    "191": '20180806_080756',
+    "205": '20181008_074949',
+    "215": '20190128_073807',
+    "218": '20190114_074903',
+    "228": '20190304_074149',
+    "240": '20191028_074716',
+    "199": '20190916_075735',
+    "227": '20190401_074904',
+    "230": '20190527_075031',
+    "235": '20190603_075620',
+    "236": '20190624_081053',
+    "241": '20191216_075927'
+ }
 
-except ModuleNotFoundError:
-    try:
-        from run_nightly import find_files, get_delta_t
-        from definitions import firsts
-        from run_nightly import Tmax
-    except ModuleNotFoundError:
-        import sys
-        sys.path.insert(0, "/cluster/home/bazapf/nobackup/sleepCode/")
-        from scripts.simulations.run_nightly import find_files, get_delta_t
-        from scripts.plots.definitions import firsts
-        from scripts.simulations.run_nightly import Tmax
 
-
+Tmax = 2.5 * 24 * 3600
 parameters['allow_extrapolation'] = True
 
+def find_files(pat, concfolder, data_folder):
+    folder = data_folder + '/%s/' % pat + concfolder + '/'
+    files = os.listdir(folder)
+    new_files = [folder + files[i]
+                 for i in range(len(files)) if files[i].startswith('2')]
+    new_files = sorted(new_files)
+    return new_files
+
+def get_delta_t(f1, f2):
+    frmt = '%Y%m%d_%H%M%S'
+    A1 = f1.split("/")[-1]
+    A2 = f2.split("/")[-1]
+
+    try:
+        date_time1 = A1.split('_concentration')[0]
+        date_time2 = A2.split('_concentration')[0]
+        date_obj1 = datetime.strptime(date_time1, frmt)
+        date_obj2 = datetime.strptime(date_time2, frmt)      
+    except ValueError:
+        date_time1 = A1.split('_masked_increase')[0]
+        date_time2 = A2.split('_masked_increase')[0]
+        date_obj1 = datetime.strptime(date_time1, frmt)
+        date_obj2 = datetime.strptime(date_time2, frmt)
+
+
+    
+    difference = date_obj2 - date_obj1
+    time = difference.days * 3600 * 24 + difference.seconds
+    return time
 
 
 def float_to_filestring(t):
@@ -67,16 +108,8 @@ def interpolate_bc_guess(data, k, params):
         if t_ > data.measurement_points()[idx + 1] and not (t_ > params["T"]):
             idx += 1
 
-        # if t_ > extended_t[idx + 1] and not (t_ > params["T"]):
-        #     idx += 1
-
         g = Function(data.function_space)
         
-        # g_i = extended_data[extended_t[idx]].vector()[:]
-        # g_ii = extended_data[extended_t[idx + 1]].vector()[:]
-        # t_i = extended_t[idx]
-        # t_ii = extended_t[idx + 1]
-
         g_i = data.get_measurement(data.measurement_points()[idx]).vector()[:]
         g_ii = data.get_measurement(data.measurement_points()[idx + 1]).vector()[:]
         t_i = data.measurement_points()[idx]
@@ -135,10 +168,6 @@ def load_fenics_files(functionspace, hdfs, mesh2path, keys_to_load=None):
     
         t = float_to_filestring(float(file[:-7]) / 3600)
 
-        # assert t in mapping.keys()
-        
-        # if t == float_to_filestring(float(file[:-7]) /  3600):
-
         fun = Function(V)
         hdf5 = HDF5File(mesh2.mpi_comm(), hdfs + file, "r")
         hdf5_name = "u"
@@ -148,67 +177,9 @@ def load_fenics_files(functionspace, hdfs, mesh2path, keys_to_load=None):
         hdf5.read(fun, hdf5_name)
         hdf5.close()
 
-        # breakpoint()
-
         simulations[t] = project(fun, V=functionspace)
         
     return simulations
-
-
-
-
-
-
-
-
-class Nan_Filter():
-    def __init__(self, maskpath):
-
-        # raise ValueError
-
-        assert os.path.isfile(maskpath)
-
-        ajdacent_idx = []
-        for x in [-1, 0, 1]:
-            for y in [-1, 0, 1]:
-                for z in [-1, 0, 1]:
-                    ajdacent_idx.append([x, y, z])
-        ajdacent_idx.remove([0, 0, 0])
-        self.ajdacent_idx = numpy.array(ajdacent_idx)
-
-        self.mask = numpy.load(maskpath)
-
-
-    def __call__(self, data, ijk, i, j, k):
-                
-        data = numpy.where(self.mask, data, numpy.nan)
-
-        nan_idx = numpy.argwhere(numpy.isnan(data[i, j, k]))
-
-        nan_ijk = ijk[:, nan_idx[:, 0]]
-        ni, nj, nk = numpy.rint(nan_ijk).astype("int")
-
-        data2 = numpy.copy(data)
-        idx = numpy.zeros_like(self.ajdacent_idx)
-
-        for x, y, z in zip(ni, nj, nk):
-            
-            idx[:, 0] = self.ajdacent_idx[:, 0] + x
-            idx[:, 1] = self.ajdacent_idx[:, 1] + y
-            idx[:, 2] = self.ajdacent_idx[:, 2] + z
-            
-            sr = data[idx[:, 0], idx[:, 1], idx[:, 2]]
-            
-            sr = sr[~numpy.isnan(sr)]
-
-            assert sr.size > 1
-
-            data2[x, y, z] = numpy.median(sr)
-
-
-        return data2
-
-
 
 
 
@@ -221,15 +192,6 @@ def read_image(filename, space, data_filter=None):
     image2 = nibabel.load(filename)
     data = image2.get_fdata()
 
-    
-    # breakpoint()
-
-    # if apply_filter:
-    #     print("filtering data")
-    #     data = gaussian_filter(data, sigma=sigma)
-
-
-    # print(filename, format(data[mask].sum(), ".2e"))
 
     u_data = Function(space)
     ras2vox = image2.header.get_ras2vox()
@@ -251,37 +213,6 @@ def read_image(filename, space, data_filter=None):
         print("No filter used, setting", numpy.where(numpy.isnan(data[i, j, k]), 1, 0).sum(), "/", i.size, " nan voxels to 0")
         data[i, j, k] = numpy.where(numpy.isnan(data[i, j, k]), 0, data[i, j, k])
         u_data.vector()[:] = data[i, j, k]
-        #data = my_filter(data, ijk, i, j, k)
-    
-    # breakpoint()
-    #assert numpy.isnan(data[i, j, k]).sum() == 0
-
-    
-
-    
-    # breakpoint()
-
-    # nnan = numpy.sum(numpy.where(numpy.isnan(u_data.vector()[:]), 1, 0))
-    # assert nnan == 0
-    
-    # print("nan in u_data", nnan)
-    # print("in percent", nnan / u_data.vector()[:].size)
-
-    # # IF NAN I SET VALUES EQUAL TO LEFT NEIGHBOR
-    # if numpy.isnan(u_data.vector()[0]):
-    #     nans = numpy.isnan(u_data.vector())
-    #     real = ~nans
-    #     real_idx = numpy.where(real)[0]
-    #     u_data.vector()[0] = u_data.vector()[real_idx[0]]
-    
-    # for i in range(1, len(u_data.vector()[:])):
-    #     if numpy.isnan(u_data.vector()[i]):
-    #         u_data.vector()[i] = 10
-    #         breakpoint()
-    #         # breakpoint()
-    #         print("processing nan")
-    #         # u_data.vector()[i] = u_data.vector()[i-1]
-
 
     return u_data
 
@@ -319,9 +250,8 @@ class Measurements(abc.ABC):
         
         for t in self.measurement_points():
             u = self.get_measurement(t)
-            # breakpoint()
             u_.assign(u)
-            vtkfile << u_ # float(t))
+            vtkfile << u_
 
 
 
@@ -349,28 +279,17 @@ class MRI_Measurements(Measurements):
 
             files = [firsts[params["pat"]] + "_concentration"] + [pathlib.Path(x).stem for x in files]
 
-        # NOTE "00.00" is the IC, should not be included here
         self.time_filename_mapping = {}
 
         for _, f in enumerate(files[1:]):
-            # "dt = t2 - t1"
-            # idx = idx + 1
-            # dt = get_delta_t(files[idx - 1], files[idx])
 
             dt = get_delta_t(files[0], f)
-
-            # breakpoint()
 
             if dt > Tmax:
                 print("Omit image", f)
                 continue
-
-            # key = format(float(dt) / 3600, "0.2f")
             
             key = self.timeformat(dt)
-
-            # while len(key) < 5:
-            #    key = "0" + key
 
             self.time_filename_mapping[key] = f + ".mgz"
 
@@ -378,6 +297,7 @@ class MRI_Measurements(Measurements):
 
                 print("Added ", key, "=", self.time_filename_mapping[key], "to self.time_filename_mapping")
 
+            # NOTE "00.00" is the IC, should not be included here
             assert dt > 0
 
         self.data_filter = data_filter
@@ -405,19 +325,11 @@ class MRI_Measurements(Measurements):
             
             filename = self.params["path_to_data"] + self.time_filename_mapping[t]
 
-            
-
-            self.measurements[t] = self.read_fun(filename, space=self.function_space, # tkr=True, 
-                                                data_filter=self.data_filter,
-                                                )
+            self.measurements[t] = self.read_fun(filename, space=self.function_space, data_filter=self.data_filter)
             
         return self.measurements[t]
     
     def measurement_points(self):
-        
-        # Use 
-        # list(map(lambda x: float(x), list(self.time_filename_mapping.keys())))
-        # to get a list of floats
         
         return sorted(list(map(lambda x: float(x), list(self.time_filename_mapping.keys()))))
 
