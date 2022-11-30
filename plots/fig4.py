@@ -3,7 +3,7 @@ import os
 import json
 import pickle
 import numpy as np
-from definitions import pats, groups, datafolder, reaction_resultfolder, resultfoldername
+from definitions import pats, groups, datafolder, reaction_resultfolder, resultfoldername, ylabels
 import pandas
 import scipy
 # import scipy.stats
@@ -833,7 +833,11 @@ if __name__ == "__main__":
     
     # make_figs(region="white", pats=pats, alphas=alphas, data_folder=datafolder, average_tracer=False)
 
+    width = 0.8 + 0.1
+
     for region in ["white", "gray"]:
+
+        ylabel = ylabels[region]
 
         # # display best vs. plain for every patient in a single plot
         # make_figs(region, pats, alphas, paperformat, 
@@ -843,7 +847,7 @@ if __name__ == "__main__":
         #             dpi=dpi)
 
 
-        make_barplot(region, pats, alphas, paperformat, 
+        make_barplot(region, pats, alphas, paperformat, width=width, ylabel=ylabel,
                     resultfoldername=resultfoldername, data_folder=datafolder, fs=fs,
                     savepath=plotpath + "barplot" + region + ".png", 
                     figsize=figsize,

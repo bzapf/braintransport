@@ -9,8 +9,6 @@ from scipy import stats
 from definitions import groups, resultfoldername, labels, intervals
 from helpers import get_data_in_intervals, significance_bar
 
-
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--ylim", default=None, type=float)
 
@@ -49,7 +47,7 @@ figheight = figwidth * 0.75
 
 size_inches = (figwidth, figheight)
 
-width = 0.4  # the width of the bars
+width = 0.66  # the width of the bars
 capsize_ = 2
 fontsize = None
 
@@ -66,24 +64,12 @@ sleepers = groups["sleep"]
 nonsleep = groups["sleepdep"]
 
 
-
 os.makedirs(plotpath, exist_ok=True)
 
-for roi, ylabel in zip(["avg", "gray", "white", # "avgds"
-    ], 
-    ['tracer in brain (mmol)', 'tracer in gray (mmol)', 'tracer in white (mmol)', # r'tracer at surface (mmol/m)'
-    ]
-    ):
+rois = ["avg", "gray", "white"] # ,  "avgds"
+ylabels =  ['Brain-wide (mmol)', 'Cerebral cortex (mmol)', 'Subcortical white\n matter (mmol)'] #,  r'tracer at surface (mmol/m)'
 
-
-    # fig1 = plt.figure()
-    # ax1 = fig1.gca()
-
-    # fig2 = plt.figure()
-    # ax2 = fig2.gca()
-
-    # fig3 = plt.figure()
-    # ax3 = fig3.gca()
+for roi, ylabel in zip(rois, ylabels):
 
     tracer_dict = {}
     avg_tracer_dict = {}
@@ -97,7 +83,6 @@ for roi, ylabel in zip(["avg", "gray", "white", # "avgds"
         subfolder = path_to_files + str(pat) + "/" + resultfoldername(pat) + "/alpha1/"
 
         v = 1
-
 
         if roi != "avgds":
             with open(path_to_files + str(pat) + '/region_volumes' + str(32), 'rb') as f:
@@ -176,30 +161,23 @@ for roi, ylabel in zip(["avg", "gray", "white", # "avgds"
     
     print("------------------------------------------------------------------------------")
 
-    sleep_means = np.mean(patdf, axis=0)
-    # nosleep_means = np.mean(patdf.loc[nonsleep, :], axis=0)
-    sleep_arr = np.array(patdf).astype(float)
-    # no_sleep_arr = np.array(patdf.loc[nonsleep, :]).astype(float)
+    means = np.mean(patdf, axis=0)
+    means_arr = np.array(patdf).astype(float)
 
     nan_policy = "omit"
 
-    sleep_std = stderr(np.array(patdf).astype(float), axis=0)
-    # nosleep_std = stderr(np.array(patdf.loc[nonsleep, :]).astype(float), axis=0)
+    std_Arr = stderr(means_arr, axis=0)
 
     cs = "tab:blue"
     cns = "tab:red"
-
 
     x = np.arange(len(labels))
 
     fig, ax = plt.subplots(dpi=dpi)
 
     fig.set_size_inches(size_inches[0], size_inches[1])
-    rects1 = ax.bar(x, sleep_means, width, color=cs, label='Sleep', linewidth=0.5, 
-                    yerr=sleep_std, capsize=capsize_,)
 
-    # rects2 = ax.bar(x + width / 2, nosleep_means, width, color=cns, label='Sleep deprivation',
-    #                 yerr=nosleep_std, capsize=capsize_,)
+    rects1 = ax.bar(x, means, width, color=cs, label='Sleep', linewidth=0.5, yerr=std_Arr, capsize=capsize_,)
 
     ax.spines.right.set_visible(False)
     ax.spines.top.set_visible(False)
@@ -222,16 +200,7 @@ for roi, ylabel in zip(["avg", "gray", "white", # "avgds"
         ax.set_ylim(0, argparse_dict["ylim"])
         print("Overwriting default ylim")
 
-    # if roi == "white":
-    #     ax.legend(fontsize=9)
-
     plt.locator_params(axis='y', nbins=4)
 
     fig.savefig(plotpath + roi + ".pdf")
     fig.savefig(plotpath + roi + ".png", dpi=600)
-
-#    plt.close()
-
-# plt.show()
-#plt.close()
-

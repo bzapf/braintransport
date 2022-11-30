@@ -1,7 +1,7 @@
 import os
 import argparse
 import matplotlib
-from definitions import groups, resultfoldername
+from definitions import groups, ylabels # , resultfoldername
 from barplots import make_barplot
 
 parser = argparse.ArgumentParser()
@@ -32,10 +32,10 @@ alphas = [1, 2, 3, 4, 5]
 
 imageformat = ".png"
 
-FS = 35
+FS = 36
 
 dpi = 400
-figsize = (10, 10)
+figsize = (12, 9)
 
 matplotlib.rcParams["lines.linewidth"] = 2
 matplotlib.rcParams["axes.linewidth"] = 2
@@ -64,12 +64,17 @@ if GREY_WHITE:
 #             savepath=None, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
 # exit()
 
+width = 0.8 + 0.1
+
+resultfoldername = "alphatests"
+
 for region in ["avg", "white", "gray"]:
 
+    ylabel = ylabels[region]
 
     print(region)
 
-    make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE,
+    make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE, width=width, ylabel=ylabel,
                 savepath=plotpath + plotname + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
 
     # exit()

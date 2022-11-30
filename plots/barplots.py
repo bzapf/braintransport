@@ -44,6 +44,7 @@ def make_figs(region, pats, alphas, data_folder, average_tracer=False):
             
             # else:
             #     assert np.isnan(alpha)
+            raise NotImplementedError # TODO check and use correct folder
             folder = reaction_resultfolder(pat, best=True)
             assert folder is not None
             assert os.path.isdir(folder)
@@ -105,7 +106,7 @@ def make_figs(region, pats, alphas, data_folder, average_tracer=False):
 
 
 
-def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folder, savepath, fs, figsize, dpi, GREY_WHITE=False, average_tracer=False):
+def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folder, savepath, fs, figsize, dpi, ylabel, GREY_WHITE=False, width=None, average_tracer=False):
     n_t = 4  # number of time points
     n_a = len(alphas)  # number of alphas
     n_p = len(pats)  # number of patients
@@ -122,16 +123,16 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
 
             resolution = 32
         
-            # if "alphatest" in resultfoldername(pat) and not np.isnan(alpha):
-            #     folder = data_folder + str(pat) + "/" + resultfoldername(pat) + "/alpha" + str(alpha) + "/"
+            if np.nan not in alphas:
+                folder = data_folder + str(pat) + "/" + resultfoldername + "/alpha" + str(alpha) + "/"
             
-            # else:
-            #     assert np.isnan(alpha)
-            #     folder = reaction_resultfolder(pat, best=True)
-            #     assert folder is not None
-            #     assert os.path.isdir(folder)
+            else:
+                # assert np.isnan(alpha)
+                # folder = reaction_resultfolder(pat, best=True)
+                # assert folder is not None
+                # assert os.path.isdir(folder)
 
-            folder = reaction_resultfolder(pat, best=True)
+                folder = reaction_resultfolder(pat, best=True)
 
             print(folder)
 
@@ -152,9 +153,11 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
                 roi_volume = 1e-6
 
             experimental = pd.read_csv(folder + 'experimental_data.csv')
-            if np.isnan(alpha):
+            
+            if np.isnan(alpha) or resultfoldername == "alphatests":
                 concs = pd.read_csv(folder + 'concs.csv')
             else:
+            # if np.nan in alphas and (resultfoldername != "alphatests"):
                 concs = pd.read_csv(folder + 'concs_plain.csv') 
             
             simulation_times = concs['t'] # / 3600
@@ -182,6 +185,8 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
     e, st_e = np.nanmean(conc_experimental, axis=1), np.nanstd(conc_experimental, axis=1)
 
     sim, st_sim = np.nanmean(conc_simulated, axis=1), np.nanstd(conc_simulated, axis=1)
+
+    # breakpoint()
 
     ratios = conc_simulated / np.expand_dims(conc_experimental, axis=-1)
 
@@ -274,7 +279,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
         edgecolor="k"
 
     ax.bar(x_e, y_e, yerr=st_e / 1, # np.sqrt(n_p), 
-            capsize=capsize_, color=datacolor, label=label, hatch=datahatch, edgecolor=edgecolor)
+            capsize=capsize_, width=width, color=datacolor, label=label, hatch=datahatch, edgecolor=edgecolor)
 
     print("time  ", "      2h   ", "       6h     ", "        24h    ", "    48h   ")
     print("data   ", [format(x, ".2f") + r""" pm """ + format(stdx, ".2f") for x, stdx in zip(y_e, st_e)]) #, st_e / np.sqrt(n_p))
@@ -304,15 +309,15 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
         color = next(colors)
 
         ax.bar(x_sim[i::(len(alphas))], y_sim[i::(len(alphas))], yerr=st_sim[i::(len(alphas))] / 1, #np.sqrt(n_p), 
-                edgecolor=edgecolor,
+                edgecolor=edgecolor, width=width, 
                 capsize=capsize_, label=label, color=color, hatch=hatch)
 
     ax.set_xticks([int(len(alphas)/2) + (len(alphas) + 2) * x for x in range(n_t)],)
     ax.set_xticklabels([r"$\sim 2\,$", r"$\sim 6\,$", r"$\sim 24\,$", r"$\sim 48\,$",], fontsize=fs)
 
-    ax.tick_params(axis='x', length=0)
+    ax.tick_params(axis='x', width=0)
     ax.tick_params(axis='y', labelsize=fs)
-    ax.set_ylabel("tracer in " + region + " (mmol)", fontsize=fs)
+
     ax.set_xlabel("time (hours)", fontsize=fs)
     
     
@@ -366,6 +371,16 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
                             r"$\alpha$", rotation=0)
         cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
 
+        cbar.ax.set_yticks([1, 3, 5])
+
+    if region == "white":
+        ylabel = ylabel + "   "
+        loc = "center"
+    else:
+        loc = "center"
+
+    ax.set_ylabel(ylabel, # "tracer in " + region + " (mmol)", 
+                    fontsize=fs, loc=loc)
 
     plt.tight_layout()
 

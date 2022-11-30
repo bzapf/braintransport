@@ -11,6 +11,8 @@ intervals = [
 labels = [# r"0", 
             r"$\sim$2", r"$\sim$6", r"$\sim$24", r"$\sim$48"]
 
+ylabels = {"avg": "Brain-wide (mmol)", "white": "Subcortical white matter (mmol)", "gray": "Cerebral cortex (mmol)"}
+
 groups = {}
 
 sleep = ["105", "175", "176", "178", "183", "190", "191", "205", "215", "218", "228", "240"]
