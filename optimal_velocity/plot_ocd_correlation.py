@@ -5,7 +5,6 @@ import pandas
 import seaborn as sns
 import scipy
 from collections import OrderedDict
-from IPython import embed
 import matplotlib.pyplot as plt
 import scipy
 
@@ -18,8 +17,8 @@ matplotlib.rcParams["axes.titlesize"] = "xx-large"
 matplotlib.rcParams["grid.linewidth"] = 1
 matplotlib.rcParams["xtick.labelsize"] = "xx-large"
 matplotlib.rcParams["ytick.labelsize"] = "xx-large"
-matplotlib.rcParams["legend.fontsize"] = "xx-large"
-matplotlib.rcParams["font.size"] = 14
+matplotlib.rcParams["legend.fontsize"] = "x-large"
+matplotlib.rcParams["font.size"] = 12
 
 def format_data(averages_6h, averages_24h):
 
@@ -31,9 +30,9 @@ def format_data(averages_6h, averages_24h):
 
         dep = (subject in sleep_deprived)
         speeds += [(subject, brain, "Brain-wide", "6-24h", dep)]
-        speeds += [(subject, gray, "Gray", "6-24h", dep)]
-        speeds += [(subject, white, "White", "6-24h", dep)]
-        speeds += [(subject, stem, "Stem", "6-24h", dep)]
+        speeds += [(subject, gray, "Cerebral cortex", "6-24h", dep)]
+        speeds += [(subject, white, "Subcortical white matter", "6-24h", dep)]
+        speeds += [(subject, stem, "Brain stem", "6-24h", dep)]
 
     excludes = ["172", "191", "205"]
     for subject in averages_24h:
@@ -42,9 +41,9 @@ def format_data(averages_6h, averages_24h):
         (brain, gray, white, stem) = averages_24h[subject]
         dep = (subject in sleep_deprived)
         speeds += [(subject, brain, "Brain-wide", "24-48h", dep)]
-        speeds += [(subject, gray, "Gray", "24-48h", dep)]
-        speeds += [(subject, white, "White", "24-48h", dep)]
-        speeds += [(subject, stem, "Stem", "24-48h", dep)]
+        speeds += [(subject, gray, "Cerebral cortex", "24-48h", dep)]
+        speeds += [(subject, white, "Subcortical white matter", "24-48h", dep)]
+        speeds += [(subject, stem, "Brain stem", "24-48h", dep)]
 
     df = pandas.DataFrame(speeds)
     df.columns = ["Subject", "Speed", "Region", "Time", "Deprived"]
@@ -65,30 +64,30 @@ if __name__ == "__main__":
 # salloc --ntasks=1 --mem-per-cpu=8G --time=00:59:00 --account=NN9279K --qos=devel
 # source /cluster/shared/fenics/conf/fenics-2019.1.0.saga.intel.conf
 
-    # from results.ocd_averages_6h import phi_averages_6h
-    # from results.ocd_averages_24h import phi_averages_24h
+    from results.ocd_averages_6h import phi_averages_6h
+    from results.ocd_averages_24h import phi_averages_24h
 
-    # df = format_data(phi_averages_6h, phi_averages_24h)
+    df = format_data(phi_averages_6h, phi_averages_24h)
 
-    # df.to_csv("/cluster/home/bazapf/nobackup/sleepCode/scripts/optimal-velocity/results/dataframe.csv")
+    df.to_csv("./results/dataframe.csv")
 
 
     df = pandas.read_csv("./results/dataframe.csv")
 
-    print(df)
+    # print(df)
 
     times = ["6-24h", "24-48h"]
 
     for t in times:
         print("-"*80)
-        for r in ["Brain-wide", "Gray", "White", "Stem"]:
+        for r in ["Brain-wide", "Cerebral cortex", "Subcortical white matter", "Brain stem"]:
             print("%s (reference versus deprived) at %s" % (r, t))
             A = df["Speed"][df.Time == t][df.Region == r][df.Deprived==False]
             B = df["Speed"][df.Time == t][df.Region == r][df.Deprived==True]
 
-            # print(len(A), len(B))
+            print(len(A), len(B))
 
-            # exit()
+    # exit()
 
     patsa = set(df["Subject"][df.Time == times[0]])
     
@@ -100,21 +99,32 @@ if __name__ == "__main__":
 
     df = df.loc[df['Subject'].isin(allpats)]
 
-    for r in ["Brain-wide", "Gray", "White", "Stem"]:
+    # print(df)
+    # exit()
+
+
+    for r in ["Brain-wide", "Cerebral cortex", "Subcortical white matter", "Brain stem"]:
         A = df["Speed"][df.Time == times[0]][df.Region == r]
         B = df["Speed"][df.Time == times[1]][df.Region == r]
         
+        # if len(A) == 0 or len(B) == 0:
+        #     print(r)
+        #     exit()
+
         test = scipy.stats.pearsonr(A, B)
         
         print("tid pearson r:", format(test[0], ".2f"))
 
         plt.figure()
         # label = r + ", r="+ format(test[0], ".2f")
-        plt.title(r + ", Pearson's r = "+ format(test[0], ".2f"))
+        plt.title(r + ", r = "+ format(test[0], ".2f"))
         plt.plot(A,B, marker="o", linewidth=0, color="k")
         plt.xlabel("$|\overline{v}|$" + " (6 -> 24 h)")
         plt.ylabel("$|\overline{v}|$" + " (24 -> 48 h)")
-        
+
+        plt.tight_layout()
 
         plt.savefig("/home/basti/Dropbox (UiO)/Apps/Overleaf (1)/Brain influx and clearance during sleep and sleep deprivation/figures/simulations/"
         + r + "-correlation.png", dpi=420)
+
+        # plt.show()

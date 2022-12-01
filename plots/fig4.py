@@ -330,6 +330,8 @@ def make_df():
         # row.append(int((j_during_train.size-1)/12))
         # row.append(format(params["optimization_time_hours"]/ int((j_during_train.size-1)/12), ".2f"))
 
+
+
         result_dict[pat] = row
 
         dones.append(pat)
@@ -351,7 +353,11 @@ for i, dt in zip(iterks, dts):
     dt_lookup[i] = dt
 
 
+
+
 def resolutiontable2(pats, latexname=None):
+
+    
 
     def formatfun(x, qty):
 
@@ -402,6 +408,8 @@ def resolutiontable2(pats, latexname=None):
 
                     alphas.append(params["alpha_final"])
                     rs.append(params["r_d_final"])
+
+                    computetimes[str(params["iter_k"])].append(params["optimization_time_hours"])
 
                     if params["j_d_final"] < lowest:
                         lowest = params["j_d_final"]
@@ -487,6 +495,7 @@ def resolutiontable2(pats, latexname=None):
         with open(latexname, "w") as text_file:
             text_file.write(latexdf)
 
+    
 
 
 
@@ -494,7 +503,7 @@ def methodtable(iterk, savepath=None, latexname=None):
 
     pats = groups["t1map"]
 
-    digits = ".1f"
+    digits = ".3f"
 
     def formatfun(x):
         if x < 1:
@@ -726,13 +735,25 @@ if __name__ == "__main__":
         else:
             return format(float(x)*1e5, ".2f")
 
-
+    computetimes = {"96": [], "144": [],"288": [],"576": [],}
     dr = resolutiontable2(pats=[x for x in pats if float(x) < 200], latexname=latexpath + "alpha-r-convergence-table<200.tex")
     dr = resolutiontable2(pats=[x for x in pats if float(x) > 200], latexname=latexpath + "alpha-r-convergence-table>200.tex")
+    
+    print("Average compute times:")
+
+    for iterk, timelist in computetimes.items():
+        print(iterk, np.mean(timelist), "+-", np.std(timelist))
 
     df, dones = make_df()
 
     print(df)
+
+    print("average red.", df["red. in J (%)"].mean(), "+-", np.std(df["red. in J (%)"]))
+
+    print("average red.", df["j_plain"].mean(), "+-", np.std(df["j_plain"]))
+    print("average red.", df["jfinal"].mean(), "+-", np.std(df["jfinal"]))
+
+    exit()
 
     iterk = "288"
     methodtable(iterk, savepath=plotpath + "alpha-r-method-tablek" + iterk +".csv", 
