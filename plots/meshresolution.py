@@ -5,12 +5,16 @@ import numpy as np
 import json
 import pandas as pd
 
-from definitions import datafolder
+from definitions import datafolder, intervals
+
+from helpers import get_data_in_intervals
 
 pat = "205"
 pat = "105"
 
 for pat in ["105", "205"]:
+
+    c16, c32, c64 = None, None, None
 
     alpha=1
     r="0"
@@ -87,6 +91,9 @@ for pat in ["105", "205"]:
     fs = 15
     lw = 1.5
 
+    c48_list32 = []
+    c48_list64 = []
+
     # for idr, roi in enumerate(["avg", "white", "gray"]):
     for idr, roi in enumerate(["avg"]):
         for idx, key in enumerate(sorted(resfolders.keys(), key=lambda x: x[1])):
@@ -101,11 +108,27 @@ for pat in ["105", "205"]:
             c = "k"
             v = 1
 
+            if int(key[0]) == 16 and int(key[1]) == 144:
+                assert c16 is None
+                c16 = exceltable["avg"]
+
+                _, c16intervals = get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)
+
             if int(key[0]) == 32 and int(key[1]) == 144:
+                assert c32 is None
                 c32 = exceltable["avg"]
 
+                _, c32intervals = get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)
+
             if int(key[0]) == 64 and int(key[1]) == 144:
+                assert c64 is None
                 c64 = exceltable["avg"]
+                _, c64intervals = get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)
+
+            if int(key[0]) == 64:
+                c48_list64.append(get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)[1])
+            if int(key[0]) == 32:
+                c48_list32.append(get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)[1])
 
             if int(key[1]) == 96:
 
@@ -132,9 +155,20 @@ for pat in ["105", "205"]:
                 label=label,
                 linestyle=linestyles[key[1]],
                 )
-            
-    print("rel. difference between 32 and 64", np.mean((c32-c64**2)) / np.mean((c64)**2))
 
+    assert c16.shape == c64.shape
+    assert c32.shape == c64.shape
+
+    p = 1
+
+    print("rel. difference between 16 and 64", np.mean(np.abs(c16-c64)**p) / np.mean(np.abs(c64)**p))            
+    print("rel. difference between 32 and 64", np.mean(np.abs(c32-c64)*p) / np.mean(np.abs(c64)**p))
+    print("Ration c32/c64 at data points", c32intervals / c64intervals)
+
+    print("Ration c16/c64 at data points", c16intervals / c64intervals)
+
+    l2diff48 = ((np.array(c48_list32)-np.array(c48_list64))**2) / (np.array(c48_list64)**2)
+    print("Maximum rel. difference at 48", np.max(l2diff48))
     plt.title("Simulated gadobutrol concentration", fontsize=fs)
     plt.xlabel("Time (hours)", fontsize=fs)
     plt.ylabel("Brain-wide (mmol / L)", fontsize=fs)
@@ -145,4 +179,4 @@ for pat in ["105", "205"]:
 
     plt.savefig("/home/basti/Dropbox (UiO)/Apps/Overleaf (1)/Brain influx and clearance during sleep and sleep deprivation/figures/mesh_resolution" + pat + ".png", dpi=444)
 
-    plt.show()
+    # plt.show()
