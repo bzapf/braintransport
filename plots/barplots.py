@@ -154,7 +154,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         df[m + 2] += list(itertools.chain.from_iterable([[format(100 * x / 0.5, ".1f"), format(100 * stdx / 0.5, ".1f")] for x, stdx in zip(simdata[:, i], simdata_standarddev[:, i])]))
         
         df[m + 3] = ["ratio sim/data"] + [alpha]
-        df[m + 3] += list(itertools.chain.from_iterable([[format(100 * x / 0.5, ".1f"), format(100 * stdx / 0.5, ".1f")] for x, stdx in zip(ratios[:, i], ratios_std[:, i])]))
+        df[m + 3] += list(itertools.chain.from_iterable([[format(100 * x, ".1f"), format(100 * stdx, ".1f")] for x, stdx in zip(ratios[:, i], ratios_std[:, i])]))
 
         df[m + 4] = ["" for x in df[m + 3]]
 
