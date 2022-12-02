@@ -1,24 +1,23 @@
-import itertools
+import argparse
 import os
 import json
-import pickle
 import numpy as np
-from definitions import pats, groups, datafolder, reaction_resultfolder, resultfoldername, ylabels
+import itertools
+
 import pandas
 import scipy
-# import scipy.stats
 import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
-# from scripts.plots.generic_plot import figsize, dpi, plot_night
-# from scripts.plots.read_data import extract_data, get_data_in_intervals, intervals
+
 from scipy import stats
-import argparse
-# from scripts.plots.read_reaction import functionalplot, alphaplot, rdrnplot
+
 import pathlib
 import warnings
-from barplots import make_barplot, make_figs
 
+
+from barplots import make_barplot, make_figs
+from definitions import pats, groups, datafolder, ylabels, reaction_resultfolder
 
 
 
@@ -115,6 +114,8 @@ def barplot(qty, qtyname, dpi, figsize, savepath=None, twinax=True):
 
 def plot_all(region, pats, path_to_files, fs, figsize, savepath=None, legend_outside=False, ylabel="avg. tracer in brain (mmol / L)", average = False,
         savedpi=300, legendfs=12):
+
+    raise NotImplementedError("Deprecated method")
 
     n = 100
 
@@ -753,7 +754,7 @@ if __name__ == "__main__":
     print("average red.", df["j_plain"].mean(), "+-", np.std(df["j_plain"]))
     print("average red.", df["jfinal"].mean(), "+-", np.std(df["jfinal"]))
 
-    exit()
+    # exit()
 
     iterk = "288"
     methodtable(iterk, savepath=plotpath + "alpha-r-method-tablek" + iterk +".csv", 
@@ -855,6 +856,11 @@ if __name__ == "__main__":
     # make_figs(region="white", pats=pats, alphas=alphas, data_folder=datafolder, average_tracer=False)
 
     width = 0.8 + 0.1
+
+
+    def resultfoldername(pat, alpha):
+        return reaction_resultfolder(pat, best=True, k=None, subfoldername="avgDTIavgT1")
+
 
     for region in ["white", "gray"]:
 

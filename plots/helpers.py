@@ -4,7 +4,7 @@ import numpy as np
 if "cluster" not in os.getcwd():
     import matplotlib.pyplot as plt
     from matplotlib.markers import TICKDOWN
-    
+
 from typing import Callable, Union
 import json, pathlib
 
@@ -139,14 +139,29 @@ def extract_data(alphas, pats, data_folder, resultfoldername: Callable, region, 
 
             assert params["concfolder"] == "FIGURES_CONC"
 
-            if region == "avgds":
-                with open(folder / 'region_areas.json') as f:
+            try:
+
+                if region == "avgds":
+                    filename = 'region_areas.json'
+
+                else:                
+                    filename = 'region_volumes.json'
+
+                with open(folder / filename) as f:
                     region_volumes = json.load(f)
                     roi_volume = region_volumes[region] / 1e6
-            else:                
-                with open(folder / 'region_volumes.json') as f:
-                    region_volumes = json.load(f)
-                    roi_volume = region_volumes[region] / 1e6
+
+            except FileNotFoundError:
+                os.chdir("/home/basti/Dropbox (UiO)/Sleep/")
+                
+                import shutil
+
+                subf = str(folder).replace("/home/basti/Dropbox (UiO)/Sleep/", "")
+                
+                inpfile = pat + "/alphatests/alpha1/" + filename
+                assert pathlib.Path(inpfile).is_file()
+                shutil.copy(inpfile, subf + "/")
+                # exit()
 
             # if alpha == 1:
             #     print(pat, region_volumes[region])

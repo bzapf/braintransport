@@ -55,8 +55,8 @@ nonconverged = ["091", "105", "172", "175", "176", "178", "190", "191", "235", "
 
 
 
-def resultfoldername(pat):
-    return "alphatests"
+# def resultfoldername(pat):
+#     return "alphatests"
 
 
 

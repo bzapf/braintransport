@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
 import os
-import pickle
+import pathlib
+import json
 import matplotlib.pyplot as plt
 import argparse
 import scipy
 from scipy import stats
-from definitions import groups, resultfoldername, labels, intervals
+from definitions import groups, labels, intervals
 from helpers import get_data_in_intervals, significance_bar
 
 parser = argparse.ArgumentParser()
@@ -56,7 +57,8 @@ def stderr(x, axis):
     return np.nanstd(x, axis=axis)
     # return stats.sem(x, axis=axis, nan_policy="omit")
 
-
+def resultfoldername(pat):
+    return "alphatests"
 
 group = "all"
 pats = groups[group]
@@ -80,26 +82,36 @@ for roi, ylabel in zip(rois, ylabels):
 
         excelpaths = []
 
-        subfolder = path_to_files + str(pat) + "/" + resultfoldername(pat) + "/alpha1/"
+        subfolder = pathlib.Path(path_to_files) / str(pat) / resultfoldername(pat) / "alpha1"
 
         v = 1
 
-        if roi != "avgds":
-            with open(path_to_files + str(pat) + '/region_volumes' + str(32), 'rb') as f:
-                region_volumes = pickle.load(f)
-            for r in roi:
-                if "ds" in roi:
-                    raise KeyError
-        else:
-            print("Loading surface areas")
-            assert roi == "avgds"
-            with open(path_to_files + str(pat) + '/region_areas' + str(32), 'rb') as f:
-                region_volumes = pickle.load(f)
+        if roi == "avgds":
+            filename = 'region_areas.json'
 
-        v = region_volumes[roi] * 1e-6
+        else:                
+            filename = 'region_volumes.json'
+
+        with open(subfolder / filename) as f:
+            region_volumes = json.load(f)
+            roi_volume = region_volumes[roi] / 1e6
+
+        # if roi != "avgds":
+        #     with open(path_to_files + str(pat) + '/region_volumes' + str(32), 'rb') as f:
+        #         region_volumes = pickle.load(f)
+        #     for r in roi:
+        #         if "ds" in roi:
+        #             raise KeyError
+        # else:
+        #     print("Loading surface areas")
+        #     assert roi == "avgds"
+        #     with open(path_to_files + str(pat) + '/region_areas' + str(32), 'rb') as f:
+        #         region_volumes = pickle.load(f)
+
+        # v = region_volumes[roi] * 1e-6
 
         try:
-            exceltable = pd.read_csv(subfolder + "experimental_data.csv")
+            exceltable = pd.read_csv(subfolder / "experimental_data.csv")
         except pd.errors.EmptyDataError:
             breakpoint()
             print(subfolder + "experimental_data.csv")
@@ -117,8 +129,8 @@ for roi, ylabel in zip(rois, ylabels):
         else:
             c = "red"
 
-        ts, tracer_at_times = get_data_in_intervals(pat, simtimes=t, simdata=total_tracer, intervals=intervals)
-        _, avg_tracer_at_times = get_data_in_intervals(pat, simtimes=t, simdata=average_tracer, intervals=intervals)
+        ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer, intervals=intervals)
+        _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer, intervals=intervals)
 
         tracer_dict[pat] = tracer_at_times.tolist()
 
