@@ -61,7 +61,7 @@ if GREY_WHITE:
     plotname = "Grey-White"
 
 
-print_format=".3f"
+print_format=".4f"
 
 width = 0.8 + 0.1
 
