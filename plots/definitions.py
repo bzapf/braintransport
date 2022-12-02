@@ -37,7 +37,11 @@ groups["nodtinot1"] = ['002', '078', '091', '127', '172', '176', '218', '230', '
 
 groups["dti"] = [x for x in groups["all"] if x not in groups["nodti"]]
 
+for key, group in groups.items():
+    groups[key] = sorted(group)
+
 pats = groups["all"]
+
 
 
 pats = ['002','078','091','105','127','172','175','176','178','183','190','191','199','205','215','218','227','228','230','235','236','240','241','249']

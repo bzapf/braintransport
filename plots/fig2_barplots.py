@@ -50,7 +50,6 @@ fs = None
 
 paperformat = True
 
-plot_avg_tracer = False
 
 GREY_WHITE=False
 
@@ -60,24 +59,33 @@ if GREY_WHITE:
     plotname = "Grey-White"
 
 
-# make_barplot("avgds", pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE,
-#             savepath=None, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
-# exit()
+print_format=".3f"
 
 width = 0.8 + 0.1
 
-resultfoldername = "alphatests"
+def resultfoldername(pat, alpha):
 
-for region in ["avg", "white", "gray"]:
+    return str(pat) + "/alphatests/alpha" + str(alpha) + "/"
+
+for region in ["avg", 
+                "white", 
+                "gray"]:
 
     ylabel = ylabels[region]
 
-    print(region)
+    print("Region=", region)
 
-    make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE, width=width, ylabel=ylabel,
-                savepath=plotpath + plotname + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=plot_avg_tracer)
+    print("Total tracer (mmol)", "." * 50)
 
-    # exit()
+    make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE, width=width, ylabel=ylabel, print_format=print_format,
+                savepath=plotpath + plotname + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=False)
+
+    print("Average tracer (mmol / L)", "." * 50)
+
+    make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE, width=width, ylabel=ylabel, print_format=print_format,
+                savepath=plotpath + plotname + "alpha_barpolots__avg_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=True)
+
+    # # exit()
 
     print("---------------------------------------------------------------------------------------------------------------")
     print("---------------------------------------------------------------------------------------------------------------")

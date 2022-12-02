@@ -128,8 +128,8 @@ for roi, ylabel in zip(["avg", "gray", "white", "avgds"], ['tracer in brain (mmo
         else:
             c = "red"
 
-        ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer, intervals=intervals)
-        _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer, intervals=intervals)
+        ts, tracer_at_times = get_data_in_intervals(pat, simtimes=t, simdata=total_tracer, intervals=intervals)
+        _, avg_tracer_at_times = get_data_in_intervals(pat, simtimes=t, simdata=average_tracer, intervals=intervals)
 
         tracer_dict[pat] = tracer_at_times.tolist()
 

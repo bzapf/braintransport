@@ -2,17 +2,19 @@ import numpy as np
 import os
 import pandas as pd
 import pickle
-from definitions import intervals, reaction_resultfolder
 import matplotlib.pyplot as plt
 import json
-from helpers import get_data_in_intervals
+
 import matplotlib
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.colors import LinearSegmentedColormap
+from typing import Callable, Union
 
 
-
+# from helpers import get_data_in_intervals, sim_at_mri_times
+from definitions import intervals # , reaction_resultfolder
+from helpers import extract_data
 
 
 def make_figs(region, pats, alphas, data_folder, average_tracer=False):
@@ -91,8 +93,8 @@ def make_figs(region, pats, alphas, data_folder, average_tracer=False):
             ax.plot(simulation_times / 3600, simulated_tracer, linestyle=ls, color=col)
             ax.plot(experimental_times / 3600, measured_tracer, linestyle="-", linewidth="0", marker="x", color=col)
 
-            _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=experimental_times, stored_data=measured_tracer, intervals=intervals)
-            _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simulation_times, stored_data=simulated_tracer, intervals=intervals)
+            _, measured_tracer_at_times = get_data_in_intervals(pat, simtimes=experimental_times, simdata=measured_tracer, intervals=intervals)
+            _, simulated_tracer_at_times = get_data_in_intervals(pat, simtimes=simulation_times, simdata=simulated_tracer, intervals=intervals)
 
 
     plt.show()
@@ -106,95 +108,42 @@ def make_figs(region, pats, alphas, data_folder, average_tracer=False):
 
 
 
-def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folder, savepath, fs, figsize, dpi, ylabel, GREY_WHITE=False, width=None, average_tracer=False):
-    n_t = 4  # number of time points
-    n_a = len(alphas)  # number of alphas
-    n_p = len(pats)  # number of patients
-    conc_simulated = np.zeros((n_t, n_p, n_a)) + np.nan
-    conc_experimental = np.zeros((n_t, n_p))  + np.nan
+def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, data_folder, savepath: Union[None, str], fs, figsize, dpi, ylabel, 
+                GREY_WHITE=False, width=None, print_format=".2f",
+                average_tracer=False):
+
 
     fig, ax = plt.subplots()
 
-    for alpha_idx, alpha in enumerate(alphas):
-        
-        pat_no = 0
+    conc_experimental, conc_simulated = extract_data(alphas, pats, data_folder, resultfoldername, region, average_tracer, intervals)
 
-        for pat in pats:
+    mridata, mridata_standarddev = np.nanmean(conc_experimental, axis=1), np.nanstd(conc_experimental, axis=1)
 
-            resolution = 32
-        
-            if np.nan not in alphas:
-                folder = data_folder + str(pat) + "/" + resultfoldername + "/alpha" + str(alpha) + "/"
-            
-            else:
-                # assert np.isnan(alpha)
-                # folder = reaction_resultfolder(pat, best=True)
-                # assert folder is not None
-                # assert os.path.isdir(folder)
-
-                folder = reaction_resultfolder(pat, best=True)
-
-            print(folder)
-
-            params = json.load(open(folder + "params"))
-
-            assert params["concfolder"] == "FIGURES_CONC"
-
-            if region == "avgds":
-                with open(data_folder + str(pat) + '/region_areas' + str(resolution), 'rb') as f:
-                    region_volumes = pickle.load(f)
-                    roi_volume = region_volumes[region] / 1e6
-            else:                
-                with open(data_folder + str(pat) + '/region_volumes' + str(resolution), 'rb') as f:
-                    region_volumes = pickle.load(f)
-                    roi_volume = region_volumes[region] / 1e6
-
-            if average_tracer:
-                roi_volume = 1e-6
-
-            experimental = pd.read_csv(folder + 'experimental_data.csv')
-            
-            if np.isnan(alpha) or resultfoldername == "alphatests":
-                concs = pd.read_csv(folder + 'concs.csv')
-            else:
-            # if np.nan in alphas and (resultfoldername != "alphatests"):
-                concs = pd.read_csv(folder + 'concs_plain.csv') 
-            
-            simulation_times = concs['t'] # / 3600
-            simulated_tracer = concs[region] * roi_volume
-
-            assert max(np.abs(simulated_tracer)) < 1
-            
-            experimental_times = experimental['t'] # / 3600
-            measured_tracer = experimental[region] * roi_volume
-
-            _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=experimental_times, stored_data=measured_tracer, intervals=intervals)
-            _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simulation_times, stored_data=simulated_tracer, intervals=intervals)
-
-            # if pat == "241":
-            #     breakpoint()
-            conc_experimental[:, pat_no] = measured_tracer_at_times
-            conc_simulated[:, pat_no, alpha_idx] = np.where(np.isnan(measured_tracer_at_times), np.nan, simulated_tracer_at_times)
-
-            pat_no += 1
-
-    # breakpoint()
-
-    # conc_simulated = np.where(conc_simulated < 0, 0, conc_simulated)
-
-    e, st_e = np.nanmean(conc_experimental, axis=1), np.nanstd(conc_experimental, axis=1)
-
-    sim, st_sim = np.nanmean(conc_simulated, axis=1), np.nanstd(conc_simulated, axis=1)
-
-    # breakpoint()
+    simdata, simdata_standarddev = np.nanmean(conc_simulated, axis=1), np.nanstd(conc_simulated, axis=1)
 
     ratios = conc_simulated / np.expand_dims(conc_experimental, axis=-1)
 
-    # breakpoint()
-
     ratios, ratios_std = np.nanmean(ratios, axis=1), np.nanstd(ratios, axis=1)
 
-    # breakpoint()
+    print("Simulated measured tracer level")
+    print("time  ", "      2h   ", "            6h     ", "            24h       ", "         48h   ")
+    print("data   ", [format(x, print_format) + r""" pm """ + format(stdx, print_format) for x, stdx in zip(mridata, mridata_standarddev)]) #, mridata_standarddev / np.sqrt(n_p))
+
+    for i, alpha in enumerate(alphas):
+
+
+        print("alpha", alpha,  [format(x, print_format) + " pm " + format(stdx, print_format) for x, stdx in zip(simdata[:, i], simdata_standarddev[:, i])])
+
+    print("Ratios between simulation and data")
+   
+    print("time                         ", "      2h   ", "            6h     ", "        24h    ", "    48h   ")    
+    for i, alpha in enumerate(alphas):
+        print("alpha=", alpha, "Ratios sim/data =",  [format(x, print_format) + " pm " + format(stdx, print_format) for x, stdx in zip(ratios[:, i], ratios_std[:, i])])
+
+    if "none" in savepath.lower():
+        print("'none' found in <savepath>, only printing info and exiting make_barplot()")
+        return
+
 
     # BZ Generalization to more alphas, populate list and skip 2 (to plot exp data and have space between groups)
     k = 0
@@ -203,7 +152,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
     x_e_s = []
     xticks_ = [kk]
 
-    for j in range(n_t):
+    for j in range(simdata.shape[0]):
         if j > 0:
             k += 2
             kk += 1
@@ -219,15 +168,13 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
             xticks_.append(kk)
     
     x_sim = np.array(x_sim_)
-    y_sim = sim.flatten()
-    st_sim = st_sim.flatten()
+    y_sim = simdata.flatten()
+    simdata_standarddev = simdata_standarddev.flatten()
 
     x_e = np.array(x_e_s)
-    y_e = e.flatten()
-    st_e = st_e.flatten()
+    y_e = mridata.flatten()
+    mridata_standarddev = mridata_standarddev.flatten()
 
-    names = ['exp'] + [r'$\alpha$ = %d' % i for i in range(1, max(alphas) + 1)]
-    names = ['exp'] + [r'%d' % i for i in range(1, max(alphas) + 1)]
 
     capsize_ = 2
     k = 2
@@ -278,18 +225,10 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
         datahatch='...'
         edgecolor="k"
 
-    ax.bar(x_e, y_e, yerr=st_e / 1, # np.sqrt(n_p), 
+    ax.bar(x_e, y_e, yerr=mridata_standarddev / 1, # np.sqrt(n_p), 
             capsize=capsize_, width=width, color=datacolor, label=label, hatch=datahatch, edgecolor=edgecolor)
 
-    print("time  ", "      2h   ", "       6h     ", "        24h    ", "    48h   ")
-    print("data   ", [format(x, ".2f") + r""" pm """ + format(stdx, ".2f") for x, stdx in zip(y_e, st_e)]) #, st_e / np.sqrt(n_p))
-
-    for i, alpha in enumerate(alphas):
-
-
-        print("alpha", alpha,  [format(x, ".2f") + " pm " + format(stdx, ".2f") for x, stdx in zip(y_sim[i::(len(alphas))], st_sim[i::(len(alphas))])])
-        print("Ratios=",  [format(x, ".2f") + " pm " + format(stdx, ".2f") for x, stdx in zip(ratios[:, i], ratios_std[:, i])])
-
+    for i, alpha in enumerate(alphas):    
         hatch = None
         label = None
 
@@ -302,24 +241,21 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername, data_folde
         elif np.isnan(alpha):
             hatch = "xx"
             label = "enhanced diffusion\n& local clearance"
-
-
-        # else:
             
         color = next(colors)
 
-        ax.bar(x_sim[i::(len(alphas))], y_sim[i::(len(alphas))], yerr=st_sim[i::(len(alphas))] / 1, #np.sqrt(n_p), 
+        ax.bar(x_sim[i::(len(alphas))], y_sim[i::(len(alphas))], yerr=simdata_standarddev[i::(len(alphas))] / 1, #np.sqrt(n_p), 
                 edgecolor=edgecolor, width=width, 
                 capsize=capsize_, label=label, color=color, hatch=hatch)
 
-    ax.set_xticks([int(len(alphas)/2) + (len(alphas) + 2) * x for x in range(n_t)],)
+
+    ax.set_xticks([int(len(alphas)/2) + (len(alphas) + 2) * x for x in range(simdata.shape[0])],)
     ax.set_xticklabels([r"$\sim 2\,$", r"$\sim 6\,$", r"$\sim 24\,$", r"$\sim 48\,$",], fontsize=fs)
 
     ax.tick_params(axis='x', width=0)
     ax.tick_params(axis='y', labelsize=fs)
 
     ax.set_xlabel("time (hours)", fontsize=fs)
-    
     
     
     if np.nan in alphas:

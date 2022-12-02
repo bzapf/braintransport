@@ -92,8 +92,8 @@ def method_barplots(parameters, roi, pats, path_to_files, resultfoldernames, lab
             
             simtimes = np.array(simtimes)
 
-            _, measured_tracer_at_times = get_data_in_intervals(pat, stored_times=data_times, stored_data=data, intervals=intervals)
-            _, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simtimes, stored_data=simdata, intervals=intervals)
+            _, measured_tracer_at_times = get_data_in_intervals(pat, simtimes=data_times, simdata=data, intervals=intervals)
+            _, simulated_tracer_at_times = get_data_in_intervals(pat, simtimes=simtimes, simdata=simdata, intervals=intervals)
 
             ratios[:, pat_counter, param_counter] = (simulated_tracer_at_times / measured_tracer_at_times)[print_from:]
             
@@ -281,7 +281,7 @@ def load_sirs(roi):
 
         exceltable = pandas.read_csv(path2sir)
 
-        _, avgsir = get_data_in_intervals(pat, stored_times=exceltable["t"], stored_data=exceltable[roi], intervals=intervals)
+        _, avgsir = get_data_in_intervals(pat, simtimes=exceltable["t"], simdata=exceltable[roi], intervals=intervals)
 
         if roi != "avgds":
             with open(os.path.join(data_folder, pat, 'region_volumes' + str(32)), 'rb') as f:

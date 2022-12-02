@@ -112,23 +112,23 @@ for pat in ["105", "205"]:
                 assert c16 is None
                 c16 = exceltable["avg"]
 
-                _, c16intervals = get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)
+                _, c16intervals = get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)
 
             if int(key[0]) == 32 and int(key[1]) == 144:
                 assert c32 is None
                 c32 = exceltable["avg"]
 
-                _, c32intervals = get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)
+                _, c32intervals = get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)
 
             if int(key[0]) == 64 and int(key[1]) == 144:
                 assert c64 is None
                 c64 = exceltable["avg"]
-                _, c64intervals = get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)
+                _, c64intervals = get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)
 
             if int(key[0]) == 64:
-                c48_list64.append(get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)[1])
+                c48_list64.append(get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)[1])
             if int(key[0]) == 32:
-                c48_list32.append(get_data_in_intervals(pat="205", stored_times=exceltable["t"], stored_data=exceltable["avg"], intervals=intervals)[1])
+                c48_list32.append(get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)[1])
 
             if int(key[1]) == 96:
 
