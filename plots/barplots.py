@@ -2,12 +2,13 @@ import numpy as np
 import os
 import pandas as pd
 import pickle
-import matplotlib.pyplot as plt
+
 import json
 
 if "cluster" not in os.getcwd():
 
     import matplotlib
+    import matplotlib.pyplot as plt
     from matplotlib.collections import LineCollection
     from matplotlib.colors import ListedColormap, BoundaryNorm
     from matplotlib.colors import LinearSegmentedColormap
