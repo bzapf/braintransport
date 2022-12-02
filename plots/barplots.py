@@ -2,7 +2,7 @@ import numpy as np
 import os
 import pandas as pd
 import pickle
-
+import itertools
 import json
 
 if "cluster" not in os.getcwd():
@@ -128,25 +128,50 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
 
     ratios, ratios_std = np.nanmean(ratios, axis=1), np.nanstd(ratios, axis=1)
 
+    if average_tracer:
+        unit = "(mmol/L)"
+    else:
+        unit = "(mmol)"
+    df = {}
+
     print("Simulated measured tracer level")
-    print("time  ", "      2h   ", "            6h     ", "            24h       ", "         48h   ")
-    print("data   ", [format(x, print_format) + r""" pm """ + format(stdx, print_format) for x, stdx in zip(mridata, mridata_standarddev)]) #, mridata_standarddev / np.sqrt(n_p))
+    columns = [""] + ["alpha"] + list(itertools.chain.from_iterable([["mean (" + x + ")", "std. (" + x + ")"] for x in ["2h", "6h", "24h", "48h"]]))
+    df[0] = ["data " + unit] + ["-"] + list(itertools.chain.from_iterable([[format(x, print_format), format(stdx, print_format)] for x, stdx in zip(mridata, mridata_standarddev)]))
+    
+    df[1] = ["data (%)"] + ["-"] + list(itertools.chain.from_iterable([[format(100 * x / 0.5, ".1f"), format(100 * stdx / 0.5, ".1f")] for x, stdx in zip(mridata, mridata_standarddev)]))
 
     for i, alpha in enumerate(alphas):
+        m = max(df.keys())
+
+        df[m + 1] = ["" for x in df[m]]
+        
+        m = max(df.keys())
+
+        df[m + 1] = ["simulated " + unit] + [alpha] 
+        df[m + 1] += list(itertools.chain.from_iterable([[format(x, print_format), format(stdx, print_format)] for x, stdx in zip(simdata[:, i], simdata_standarddev[:, i])]))
+        
+        df[m + 2] = ["simulated (%)"] + [alpha] 
+        df[m + 2] += list(itertools.chain.from_iterable([[format(100 * x / 0.5, ".1f"), format(100 * stdx / 0.5, ".1f")] for x, stdx in zip(simdata[:, i], simdata_standarddev[:, i])]))
+        
+        df[m + 3] = ["ratio sim/data"] + [alpha]
+        df[m + 3] += list(itertools.chain.from_iterable([[format(100 * x / 0.5, ".1f"), format(100 * stdx / 0.5, ".1f")] for x, stdx in zip(ratios[:, i], ratios_std[:, i])]))
+
+        df[m + 4] = ["" for x in df[m + 3]]
 
 
-        print("alpha", alpha,  [format(x, print_format) + " pm " + format(stdx, print_format) for x, stdx in zip(simdata[:, i], simdata_standarddev[:, i])])
+    df = pd.DataFrame.from_dict(df, orient="index", columns=columns)
 
-    print("Ratios between simulation and data")
-   
-    print("time                         ", "      2h   ", "            6h     ", "        24h    ", "    48h   ")    
-    for i, alpha in enumerate(alphas):
-        print("alpha=", alpha, "Ratios sim/data =",  [format(x, print_format) + " pm " + format(stdx, print_format) for x, stdx in zip(ratios[:, i], ratios_std[:, i])])
+    print("-" * 120)
+    print("Region:", region, "average tracer =", average_tracer)
+    print(df)
+    print("-" * 120)
 
     if "none" in savepath.lower():
         print("'none' found in <savepath>, only printing info and exiting make_barplot()")
         return
 
+    
+    # exit()
 
     # BZ Generalization to more alphas, populate list and skip 2 (to plot exp data and have space between groups)
     k = 0

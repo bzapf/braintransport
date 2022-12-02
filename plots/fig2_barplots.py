@@ -13,6 +13,7 @@ default_output_path += "Brain influx and clearance during sleep and sleep depriv
 
 parser.add_argument("--inputpath", type=str, default=default_input_path)
 parser.add_argument("--outputpath", type=str, default=default_output_path)
+parser.add_argument("--printAvg", action="store_true", default=False, help="print info and make plots using average tracer (mmol/L)")
 
 parserargs = parser.parse_args()
 argparse_dict = vars(parserargs)
@@ -83,7 +84,9 @@ for region in ["avg",
                 savepath=plotpath + plotname + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=False)
 
     print("Average tracer (mmol / L)", "." * 50)
-
+    if not argparse_dict["printAvg"]:
+        continue
+    
     make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE, width=width, ylabel=ylabel, print_format=print_format,
                 savepath=plotpath + plotname + "alpha_barpolots__avg_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=True)
 
