@@ -1,6 +1,7 @@
 import os
 import argparse
-import matplotlib
+if "cluster" not in os.getcwd():
+    import matplotlib
 from definitions import groups, ylabels # , resultfoldername
 from barplots import make_barplot
 
@@ -37,14 +38,15 @@ FS = 36
 dpi = 400
 figsize = (12, 9)
 
-matplotlib.rcParams["lines.linewidth"] = 2
-matplotlib.rcParams["axes.linewidth"] = 2
-matplotlib.rcParams["axes.labelsize"] = FS # "xx-large"
-matplotlib.rcParams["grid.linewidth"] = 1
-matplotlib.rcParams["xtick.labelsize"] = FS # "xx-large"
-matplotlib.rcParams["ytick.labelsize"] = FS # "xx-large"
-matplotlib.rcParams["legend.fontsize"] = FS # "xx-large"
-matplotlib.rcParams["font.size"] = FS
+if "cluster" not in os.getcwd():
+    matplotlib.rcParams["lines.linewidth"] = 2
+    matplotlib.rcParams["axes.linewidth"] = 2
+    matplotlib.rcParams["axes.labelsize"] = FS # "xx-large"
+    matplotlib.rcParams["grid.linewidth"] = 1
+    matplotlib.rcParams["xtick.labelsize"] = FS # "xx-large"
+    matplotlib.rcParams["ytick.labelsize"] = FS # "xx-large"
+    matplotlib.rcParams["legend.fontsize"] = FS # "xx-large"
+    matplotlib.rcParams["font.size"] = FS
 
 fs = None
 

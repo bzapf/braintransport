@@ -5,10 +5,12 @@ import pickle
 import matplotlib.pyplot as plt
 import json
 
-import matplotlib
-from matplotlib.collections import LineCollection
-from matplotlib.colors import ListedColormap, BoundaryNorm
-from matplotlib.colors import LinearSegmentedColormap
+if "cluster" not in os.getcwd():
+
+    import matplotlib
+    from matplotlib.collections import LineCollection
+    from matplotlib.colors import ListedColormap, BoundaryNorm
+    from matplotlib.colors import LinearSegmentedColormap
 from typing import Callable, Union
 
 
@@ -113,7 +115,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
                 average_tracer=False):
 
 
-    fig, ax = plt.subplots()
+    
 
     conc_experimental, conc_simulated = extract_data(alphas, pats, data_folder, resultfoldername, region, average_tracer, intervals)
 

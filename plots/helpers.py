@@ -1,10 +1,13 @@
 import os
 # from definitions import intervals
 import numpy as np
-from matplotlib.markers import TICKDOWN
+if "cluster" not in os.getcwd():
+    import matplotlib.pyplot as plt
+    from matplotlib.markers import TICKDOWN
+    
 from typing import Callable, Union
 import json, pathlib
-import matplotlib.pyplot as plt
+
 import pandas as pd
 from scipy import interpolate
 
