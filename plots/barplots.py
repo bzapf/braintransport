@@ -12,6 +12,7 @@ if "cluster" not in os.getcwd():
     from matplotlib.collections import LineCollection
     from matplotlib.colors import ListedColormap, BoundaryNorm
     from matplotlib.colors import LinearSegmentedColormap
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from typing import Callable, Union
 
 
@@ -156,7 +157,6 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         df[m + 3] = ["ratio sim/data"] + [alpha]
         df[m + 3] += list(itertools.chain.from_iterable([[format(100 * x, ".1f"), format(100 * stdx, ".1f")] for x, stdx in zip(ratios[:, i], ratios_std[:, i])]))
 
-        df[m + 4] = ["" for x in df[m + 3]]
 
 
     df = pd.DataFrame.from_dict(df, orient="index", columns=columns)
@@ -196,8 +196,8 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
             xticks_.append(kk)
     
     x_sim = np.array(x_sim_)
-    y_sim = simdata.flatten()
-    simdata_standarddev = simdata_standarddev.flatten()
+    # y_sim = simdata.flatten()
+    # simdata_standarddev = simdata_standarddev.flatten()
 
     x_e = np.array(x_e_s)
     y_e = mridata.flatten()
@@ -272,10 +272,15 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
             
         color = next(colors)
 
-        ax.bar(x_sim[i::(len(alphas))], y_sim[i::(len(alphas))], yerr=simdata_standarddev[i::(len(alphas))] / 1, #np.sqrt(n_p), 
+
+        ax.bar(x_sim[i::(len(alphas))], 
+                simdata[:, i], yerr=simdata_standarddev[:, i],
+                # y_sim[i::(len(alphas))], yerr=simdata_standarddev[i::(len(alphas))] / 1, #np.sqrt(n_p), 
                 edgecolor=edgecolor, width=width, 
                 capsize=capsize_, label=label, color=color, hatch=hatch)
 
+    # if region == "white":
+    #     breakpoint()
 
     ax.set_xticks([int(len(alphas)/2) + (len(alphas) + 2) * x for x in range(simdata.shape[0])],)
     ax.set_xticklabels([r"$\sim 2\,$", r"$\sim 6\,$", r"$\sim 24\,$", r"$\sim 48\,$",], fontsize=fs)
@@ -318,24 +323,52 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
 
         plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2)
         
-        dydx = np.zeros(10)
-        segments = np.zeros((10, 2, 2)) + np.nan
+        # New version:
+        if region == "white":
+            cbaxes = inset_axes(ax, width="5%", height="40%", loc=2) 
+        elif region == "gray":
+            cbaxes = inset_axes(ax, width="30%", height="5%", loc=1)
 
-        cmap_name = 'my_list'
-        cmap = LinearSegmentedColormap.from_list(cmap_name, colorlist, N=100)
 
-        norm = plt.Normalize(min(alphas), max(alphas))
-        lc = LineCollection([], cmap=cmap, norm=norm)
-        # Set the values used for colormapping
-        lc.set_array(dydx)
-        lc.set_linewidth(0)
-        line = ax.add_collection(lc)
-        cbar = fig.colorbar(line, ax=ax, shrink=0.5)
-        cbar.ax.set_xlabel(#"dispersion\nfactor\n"+
-                            r"$\alpha$", rotation=0)
-        cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+            dydx = np.zeros(10)
 
-        cbar.ax.set_yticks([1, 3, 5])
+            cmap_name = 'my_list'
+            cmap = LinearSegmentedColormap.from_list(cmap_name, colorlist, N=100)
+
+            norm = plt.Normalize(min(alphas), max(alphas))
+            lc = LineCollection([], cmap=cmap, norm=norm)
+            
+            # Set the values used for colormapping
+            lc.set_array(dydx)
+            lc.set_linewidth(0)
+
+            line = cbaxes.add_collection(lc)
+
+            cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='vertical')
+            
+            cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
+            cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+
+            cbar.ax.set_yticks([1, 3, 5])
+
+        else: 
+            # old version:
+            dydx = np.zeros(10)
+            cmap_name = 'my_list'
+            cmap = LinearSegmentedColormap.from_list(cmap_name, colorlist, N=100)
+
+            norm = plt.Normalize(min(alphas), max(alphas))
+            lc = LineCollection([], cmap=cmap, norm=norm)
+            # Set the values used for colormapping
+            lc.set_array(dydx)
+            lc.set_linewidth(0)
+            line = ax.add_collection(lc)
+            cbar = fig.colorbar(line, ax=ax, shrink=0.5)
+            cbar.ax.set_xlabel(#"dispersion\nfactor\n"+
+                                r"$\alpha$", rotation=0)
+            cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+
+        # cbar.ax.set_yticks([1, 3, 5])
 
     if region == "white":
         ylabel = ylabel + "   "
@@ -346,7 +379,13 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
     ax.set_ylabel(ylabel, # "tracer in " + region + " (mmol)", 
                     fontsize=fs, loc=loc)
 
+    # ax.set_title(ylabel, # "tracer in " + region + " (mmol)", 
+    #                 fontsize=fs, loc=loc)
+
+    
+
     plt.tight_layout()
+
 
     if savepath is not None:
         plt.savefig(savepath, dpi=dpi)
