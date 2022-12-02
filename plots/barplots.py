@@ -321,13 +321,45 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         # segments = np.concatenate([points[:-1], points[1:]], axis=1)
         # # print(segments.shape)
 
-        plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2)
+        
+        
+        if region == "avg":
+
+            plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2, frameon=True)
+            # old version:
+            dydx = np.zeros(10)
+            cmap_name = 'my_list'
+            cmap = LinearSegmentedColormap.from_list(cmap_name, colorlist, N=100)
+
+            norm = plt.Normalize(min(alphas), max(alphas))
+            lc = LineCollection([], cmap=cmap, norm=norm)
+            # Set the values used for colormapping
+            lc.set_array(dydx)
+            lc.set_linewidth(0)
+            line = ax.add_collection(lc)
+            cbar = fig.colorbar(line, ax=ax, shrink=0.5)
+            cbar.ax.set_xlabel(#"dispersion\nfactor\n"+
+                                r"$\alpha$", rotation=0)
+            cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+            cbar.ax.set_yticks([1, 3, 5])
         
         # New version:
-        if region == "white":
-            cbaxes = inset_axes(ax, width="5%", height="40%", loc=2) 
-        elif region == "gray":
-            cbaxes = inset_axes(ax, width="30%", height="5%", loc=1)
+
+        else:
+
+            plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2, frameon=False, loc="upper left")
+            
+            # if region == "white":
+            cbaxes = inset_axes(ax, width="4%", height="40%", 
+                loc="upper left",
+                bbox_to_anchor=(0.05, 0., 1, 0.7),
+                bbox_transform=ax.transAxes,
+                borderpad=0,
+                
+                )
+            # elif region == "gray":
+            #     cbaxes = inset_axes(ax, width="4%", height="40%", loc="center left")
+
 
 
             dydx = np.zeros(10)
@@ -344,29 +376,18 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
 
             line = cbaxes.add_collection(lc)
 
-            cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='vertical')
-            
-            cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
-            cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+            if region == "white":
+                cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='vertical')
+                cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
+                cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+            elif region == "gray":
+                cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='vertical')
+                cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
+                cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
 
             cbar.ax.set_yticks([1, 3, 5])
 
-        else: 
-            # old version:
-            dydx = np.zeros(10)
-            cmap_name = 'my_list'
-            cmap = LinearSegmentedColormap.from_list(cmap_name, colorlist, N=100)
 
-            norm = plt.Normalize(min(alphas), max(alphas))
-            lc = LineCollection([], cmap=cmap, norm=norm)
-            # Set the values used for colormapping
-            lc.set_array(dydx)
-            lc.set_linewidth(0)
-            line = ax.add_collection(lc)
-            cbar = fig.colorbar(line, ax=ax, shrink=0.5)
-            cbar.ax.set_xlabel(#"dispersion\nfactor\n"+
-                                r"$\alpha$", rotation=0)
-            cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
 
         # cbar.ax.set_yticks([1, 3, 5])
 
@@ -376,11 +397,11 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
     else:
         loc = "center"
 
-    ax.set_ylabel(ylabel, # "tracer in " + region + " (mmol)", 
-                    fontsize=fs, loc=loc)
-
-    # ax.set_title(ylabel, # "tracer in " + region + " (mmol)", 
+    # ax.set_ylabel(ylabel, # "tracer in " + region + " (mmol)", 
     #                 fontsize=fs, loc=loc)
+
+    ax.set_title(ylabel, # "tracer in " + region + " (mmol)", 
+                    fontsize=fs, loc=loc)
 
     
 

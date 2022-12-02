@@ -37,7 +37,7 @@ imageformat = ".png"
 FS = 36
 
 dpi = 400
-figsize = (12, 9)
+figsize = (12, 8)
 
 if "cluster" not in os.getcwd():
     matplotlib.rcParams["lines.linewidth"] = 2

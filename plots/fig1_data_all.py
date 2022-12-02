@@ -180,8 +180,20 @@ for roi, ylabel in zip(rois, ylabels):
 
     std_Arr = stderr(means_arr, axis=0)
 
-    cs = "tab:blue"
-    cns = "tab:red"
+    # cs = "tab:blue"
+    # cns = "tab:red"
+
+    if roi == "white":
+        cs = np.array([0.45176471, 0.76708958, 0.46120723, 1.        ])
+        edgecolor = None
+
+    elif roi == "gray":
+        cs = np.array([0.41708574, 0.68063053, 0.83823145, 1.        ])
+        edgecolor = None
+
+    else:
+        cs = "white"
+        edgecolor = "k"
 
     x = np.arange(len(labels))
 
@@ -189,7 +201,7 @@ for roi, ylabel in zip(rois, ylabels):
 
     fig.set_size_inches(size_inches[0], size_inches[1])
 
-    rects1 = ax.bar(x, means, width, color=cs, label='Sleep', linewidth=0.5, yerr=std_Arr, capsize=capsize_,)
+    rects1 = ax.bar(x, means, width, color=cs, label='Sleep', linewidth=0.5, edgecolor=edgecolor, yerr=std_Arr, capsize=capsize_,)
 
     ax.spines.right.set_visible(False)
     ax.spines.top.set_visible(False)
