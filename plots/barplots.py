@@ -112,7 +112,7 @@ def make_figs(region, pats, alphas, data_folder, average_tracer=False):
 
 
 
-def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, data_folder, savepath: Union[None, str], fs, figsize, dpi, ylabel, 
+def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, data_folder, savepath: Union[None, str], FS, figsize, dpi, ylabel, 
                 GREY_WHITE=False, width=None, print_format=".2f",
                 average_tracer=False):
 
@@ -223,7 +223,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
 
         if GREY_WHITE:
             colors = ["white" for x in range(5)]
-            hatches = ["."*i for i in range(1, 6)]
+            hatches = ["."*(i-1) for i in range(1, 6)]
 
     elif region == "gray":
         colors = np.array([[0.41708574, 0.68063053, 0.83823145, 1.        ],
@@ -289,12 +289,12 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
     #     breakpoint()
 
     ax.set_xticks([int(len(alphas)/2) + (len(alphas) + 2) * x for x in range(simdata.shape[0])],)
-    ax.set_xticklabels([r"$\sim 2\,$", r"$\sim 6\,$", r"$\sim 24\,$", r"$\sim 48\,$",], fontsize=fs)
+    ax.set_xticklabels([r"$\sim 2\,$", r"$\sim 6\,$", r"$\sim 24\,$", r"$\sim 48\,$",], fontsize=None)
 
     ax.tick_params(axis='x', width=0)
-    ax.tick_params(axis='y', labelsize=fs)
+    ax.tick_params(axis='y', labelsize=None)
 
-    ax.set_xlabel("time (hours)", fontsize=fs)
+    ax.set_xlabel("time (hours)", fontsize=None)
     
     
     if np.nan in alphas:
@@ -366,9 +366,9 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
             plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2, frameon=False, loc="upper left")
             
             # if region == "white":
-            cbaxes = inset_axes(ax, width="4%", height="40%", 
+            cbaxes = inset_axes(ax, width="40%", height="4%", 
                 loc="upper left",
-                bbox_to_anchor=(0.05, 0., 1, 0.7),
+                bbox_to_anchor=(0.03, 0., 1, 0.84),
                 bbox_transform=ax.transAxes,
                 borderpad=0,
                 
@@ -393,18 +393,45 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
             line = cbaxes.add_collection(lc)
 
             if region == "white":
-                cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='vertical')
-                cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
-                cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+                cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='horizontal')
+                # print(ax.get_xlim())
+                # print(alphas)
+                # print([int(len(alphas)/2) + (len(alphas) + 2) * x for x in range(simdata.shape[0])])
+                # breakpoint()
+                # cbaxes.bar([0.2, 0.23], [0,2], width=0.5, color="k")
+                # cbaxes.plot(np.linspace(2, 4, 10), np.linspace(0.05, 0.06, 10),color="red", markersize=100, marker="x")
+
+                # nx, ny = 4, 4
+                # xx, yy = np.meshgrid(np.linspace(0,1, nx), np.linspace(0,1, ny))                
+
+                # xy = np.reshape(np.stack((xx, yy)), (2, nx*ny))
+
+                # xy[1, :] += 1
+
+
+                # cbaxes.scatter(xy[0, :], xy[1, :])
+                # breakpoint()
+                for idx, h in enumerate(hatches):
+                    cbaxes.bar(height=1, width=4/5, x=1.5 + 4/5 * idx, # bottom=1 + idx, 
+                            hatch=h, color="white")
+
+
+
+                # pass
+
             elif region == "gray":
-                cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='vertical')
-                cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
-                cbar.ax.set_ylabel("simulation", rotation=270, labelpad=40)
+                cbar = plt.colorbar(line, cax=cbaxes, shrink=0.5, orientation='horizontal')
+                # cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
+                # cbar.ax.set_ylabel("simulation", rotation=0, labelpad=40)
 
-            cbar.ax.set_yticks([1, 3, 5])
+                # cbar.ax.set_yticks([1, 3, 5])
+
+            cbar.ax.set_xticks([1.5 + 4/5 * idx for idx in range(5)], range(1,6) )
 
 
-
+            cbar.ax.set_xlabel(r"$\alpha$", rotation=0)
+            cbar.ax.set_title("simulation", rotation=0, fontsize=FS) # , labelpad=40)
+            
         # cbar.ax.set_yticks([1, 3, 5])
 
     if region == "white":
@@ -414,10 +441,10 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         loc = "center"
 
     ax.set_ylabel(ylabel, # "tracer in " + region + " (mmol)", 
-                    fontsize=fs, loc=loc)
+                    fontsize=None, loc=loc)
 
     # ax.set_title(ylabel, # "tracer in " + region + " (mmol)", 
-    #                 fontsize=fs, loc=loc)
+    #                 fontsize=None, loc=loc)
 
     
 

@@ -140,10 +140,10 @@ for roi, ylabel in zip(rois, ylabels):
 
         tracer_dict[pat] = tracer_at_times.tolist()
 
-        if pat in sleepers:
-            tracer_dict[pat] = tracer_dict[pat] + ["sleep"]
-        else:
-            tracer_dict[pat] = tracer_dict[pat] + ["no sleep"]
+        # if pat in sleepers:
+        #     tracer_dict[pat] = tracer_dict[pat] # + [0]
+        # else:
+        #     tracer_dict[pat] = tracer_dict[pat] # + [np.inf]
 
         # avg_tracer_dict[pat] = avg_tracer_at_times.tolist()
 
@@ -154,10 +154,11 @@ for roi, ylabel in zip(rois, ylabels):
 
     patdf = pd.DataFrame.from_dict(tracer_dict).transpose()
 
+    # breakpoint()
     # avg_tracer_dict= pd.DataFrame.from_dict(avg_tracer_dict).transpose()
 
-    if type(patdf.iloc[0, patdf.columns[-1]]) is str:
-        patdf = patdf.loc[:, :(patdf.columns[-1]-1)]
+    # if type(patdf.iloc[0, patdf.columns[-1]]) is str:
+    #     patdf = patdf.loc[:, :(patdf.columns[-1]-1)]
     
     # if type(avg_tracer_dict.iloc[0, avg_tracer_dict.columns[-1]]) is str:
     #     avg_tracer_dict = avg_tracer_dict.loc[:, :(avg_tracer_dict.columns[-1]-1)]
@@ -179,7 +180,7 @@ for roi, ylabel in zip(rois, ylabels):
     
     print("------------------------------------------------------------------------------")
 
-    means = np.mean(patdf, axis=0)
+    means = np.nanmean(patdf, axis=0)
     means_arr = np.array(patdf).astype(float)
 
     # breakpoint()
@@ -236,7 +237,9 @@ for roi, ylabel in zip(rois, ylabels):
         ax.set_ylim(0, argparse_dict["ylim"])
         print("Overwriting default ylim")
 
-    plt.locator_params(axis='y', nbins=4)
+    ax.set_yticks([0, 0.03, 0.06, 0.09, 0.12, 0.15, 0.18], fontsize=fontsize)
+
+    # plt.locator_params(axis='y', nbins=7)
 
     fig.savefig(plotpath + roi + ".pdf")
     fig.savefig(plotpath + roi + ".png", dpi=600)

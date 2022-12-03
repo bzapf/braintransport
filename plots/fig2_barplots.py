@@ -34,6 +34,7 @@ alphas = [1, 2, 3, 4, 5]
 
 imageformat = ".png"
 
+global FS
 FS = 36
 
 dpi = 400
@@ -70,9 +71,10 @@ def resultfoldername(pat, alpha):
 
     return str(pat) + "/alphatests/alpha" + str(alpha) + "/"
 
-for region in ["avg", 
+for region in [ "avg", 
                 "white", 
-                "gray"]:
+                "gray"
+                ]:
 
     ylabel = ylabels[region]
 
@@ -81,14 +83,14 @@ for region in ["avg",
     print("Total tracer (mmol)", "." * 50)
 
     make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE, width=width, ylabel=ylabel, print_format=print_format,
-                savepath=plotpath + plotname + "alpha_barpolots_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=False)
+                savepath=plotpath + plotname + "alpha_barpolots_" + region + imageformat, FS=FS, figsize=figsize, dpi=dpi, average_tracer=False)
 
     print("Average tracer (mmol / L)", "." * 50)
     if not argparse_dict["printAvg"]:
         continue
     
     make_barplot(region, pats, alphas, paperformat, resultfoldername, path_to_files, GREY_WHITE=GREY_WHITE, width=width, ylabel=ylabel, print_format=print_format,
-                savepath=plotpath + plotname + "alpha_barpolots__avg_" + region + imageformat, fs=fs, figsize=figsize, dpi=dpi, average_tracer=True)
+                savepath=plotpath + plotname + "alpha_barpolots__avg_" + region + imageformat, FS=FS, figsize=figsize, dpi=dpi, average_tracer=True)
 
     # # exit()
 

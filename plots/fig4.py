@@ -831,6 +831,13 @@ if __name__ == "__main__":
     print("mean alpha", format(np.mean(df2["alpha"]), ".1f"), "pm", format(np.std(df2["alpha"]), ".1f"))
     print("mean r", format(np.mean(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
 
+    print("median alpha", format(np.median(df2["alpha"]), ".1f"), "pm", format(np.std(df2["alpha"]), ".1f"))
+    print("median r", format(np.median(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
+    print("median half live", format(np.median(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
+
+
+    print("min alpha", format(np.min(df2["alpha"]), ".1f"), " max ", format(np.max(df2["alpha"]), ".1f"))
+    print("min r", format(np.min(df2["r_d"]), ".0f"), " max ", format(np.max(df2["r_d"]), ".0f"))
 
     del dfs   
 
