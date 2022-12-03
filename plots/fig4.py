@@ -15,6 +15,7 @@ from scipy import stats
 import pathlib
 import warnings
 
+import scipy
 
 from barplots import make_barplot, make_figs
 from definitions import pats, groups, datafolder, ylabels, reaction_resultfolder
@@ -861,6 +862,58 @@ if __name__ == "__main__":
     def resultfoldername(pat, alpha):
         return reaction_resultfolder(pat, best=True, k=None, subfoldername="avgDTIavgT1")
 
+    fig2, ax2 = plt.subplots()#figsize=figsize, dpi=dpi)
+
+    fig, ax = plt.subplots()#figsize=figsize, dpi=dpi)
+
+    bestalpha, bestr = [], []
+
+    for pat in pats:
+        foldername = resultfoldername(pat, alpha=None)
+
+        data = json.load(open(foldername + "params"))
+
+        bestalpha.append(data["alpha_final"])
+        bestr.append(data["r_d_final"])
+
+        plt.plot([0,1], [data["alpha_final"], 1e5 * data["r_d_final"]], marker="o")
+
+        ax2.plot(data["alpha_final"], 1e5 * data["r_d_final"], marker="o")
+
+    ax.set_xlim(-0.1, 1.1)
+    ax.tick_params(axis='x', width=0)
+    ax.tick_params(axis='y', labelsize=fs)
+    plt.xticks([0, 1], [r"$\alpha$", "$r \, (10^{-5}$s$^{-1}$)" ], fontsize=FS-4)
+    plt.yticks([1, 3, 5, 7, 9])
+    plt.tight_layout()
+    plt.savefig(plotpath + "bests.png", dpi=400)
+    
+
+    test = scipy.stats.pearsonr(bestalpha, bestr)
+    
+    print("tid best alpha, r pearson r:", format(test[0], ".2f"))
+
+    
+    plt.sca(ax2)
+    #ax2.tick_params(axis='x', width=0)
+    # ax2.tick_params(axis='y', labelsize=fs)
+    # plt.xticks([0, 1], [r"$\alpha$", "$r \, (10^{-5}$s$^{-1}$)" ])
+    # plt.yticks([1, 3, 5, 7, 9])
+    plt.xlabel(r"best $\alpha$", fontsize=FS-4)
+    plt.ylabel("best $r \, (10^{-5}$s$^{-1}$)", fontsize=FS-4)
+
+
+    plt.title(#x=1, y=9, s=
+            'Correlation r=' + format(test[0], ".2f"), fontsize=FS-6)
+    plt.tight_layout()
+
+    plt.savefig(plotpath + "bestscorrelation.png", dpi=400)
+    
+    # plt.show()
+
+    exit()
+
+    GREY_WHITE = True
 
     for region in ["white", "gray"]:
 
@@ -876,6 +929,6 @@ if __name__ == "__main__":
 
         make_barplot(region, pats, alphas, paperformat, width=width, ylabel=ylabel,
                     resultfoldername=resultfoldername, data_folder=datafolder, fs=fs,
-                    savepath=plotpath + "barplot" + region + ".png", 
+                    savepath=plotpath + "barplot" + region + ".png", GREY_WHITE=GREY_WHITE,
                     figsize=figsize,
                     dpi=dpi)

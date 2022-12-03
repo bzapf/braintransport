@@ -298,9 +298,13 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
     
     
     if np.nan in alphas:
-        plt.ylim(-0., 0.24)
-        ax.set_yticks([0., 0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.21])
-
+        if region == "gray":
+            plt.ylim(-0., 0.24)
+            ax.set_yticks([0., 0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.21])
+        if region == "white":
+            plt.ylim(-0., 0.12)
+            ax.set_yticks([0., 0.03, 0.06, 0.09, ])
+            
     else:
         if region == "gray":
             plt.ylim(-0.00, 0.20)

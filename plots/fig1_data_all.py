@@ -44,7 +44,7 @@ only_significant = True
 
 latex_textwidth = 7.02352416667 # inches
 figwidth = latex_textwidth / 3
-figheight = figwidth * 1 # 0.75
+figheight = figwidth * 1.1 # 0.75
 
 size_inches = (figwidth, figheight)
 
@@ -69,7 +69,7 @@ nonsleep = groups["sleepdep"]
 os.makedirs(plotpath, exist_ok=True)
 
 rois = ["avg", "gray", "white"] # ,  "avgds"
-ylabels =  ['Brain-wide (mmol)', 'Cerebral cortex (mmol)', 'Subcortical white\n matter (mmol)'] #,  r'tracer at surface (mmol/m)'
+ylabels =  ['Brain-wide (mmol)', 'Cerebral cortex (mmol)', 'Subcortical white matter (mmol)'] #,  r'tracer at surface (mmol/m)'
 
 for roi, ylabel in zip(rois, ylabels):
 
