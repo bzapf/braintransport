@@ -204,11 +204,12 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
     mridata_standarddev = mridata_standarddev.flatten()
 
 
-    capsize_ = 2
+    capsize_ = 4
     k = 2
 
     if region == "avg":
         colors = ["k" for _ in range(10)]
+        hatches = [None for x in range(5)]
 
     elif region == "avgds":
         colors = ["magenta" for _ in range(10)]
@@ -222,6 +223,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
 
         if GREY_WHITE:
             colors = ["white" for x in range(5)]
+            hatches = ["."*i for i in range(1, 6)]
 
     elif region == "gray":
         colors = np.array([[0.41708574, 0.68063053, 0.83823145, 1.        ],
@@ -232,6 +234,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
 
         if GREY_WHITE:
             colors = ["gainsboro", "silver", "darkgrey", "grey", "dimgrey"]
+            hatches = [None for x in range(5)]
 
     datacolor = colors[0]
 
@@ -246,11 +249,11 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
     # else:
     #     label = None
 
-    datahatch = '...'
+    datahatch = 'x'
     edgecolor = None
 
     if GREY_WHITE:
-        datahatch='...'
+        datahatch = 'x'
         edgecolor="k"
 
     ax.bar(x_e, y_e, yerr=mridata_standarddev / 1, # np.sqrt(n_p), 
@@ -269,7 +272,10 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         elif np.isnan(alpha):
             hatch = "xx"
             label = "enhanced diffusion\n& local clearance"
-            
+        
+        elif len(alphas) > 3:
+            hatch=hatches[i]
+
         color = next(colors)
 
 
@@ -296,9 +302,15 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         ax.set_yticks([0., 0.03, 0.06, 0.09, 0.12, 0.15, 0.18, 0.21])
 
     else:
-        plt.ylim(-0.00, 0.20)
-        ax.set_yticks([0., 0.03, 0.06, 0.09, 0.12, 0.15, 0.18])
+        if region == "gray":
+            plt.ylim(-0.00, 0.20)
+            ax.set_yticks([0., 0.03, 0.06, 0.09, 0.12, 0.15, 0.18])
     
+        if region == "white":
+            plt.ylim(-0.00, 0.11)
+            ax.set_yticks([0., 0.03, 0.06, 0.09])
+
+
     if np.nan in alphas:
         plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2)
 
@@ -397,11 +409,11 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
     else:
         loc = "center"
 
-    # ax.set_ylabel(ylabel, # "tracer in " + region + " (mmol)", 
-    #                 fontsize=fs, loc=loc)
-
-    ax.set_title(ylabel, # "tracer in " + region + " (mmol)", 
+    ax.set_ylabel(ylabel, # "tracer in " + region + " (mmol)", 
                     fontsize=fs, loc=loc)
+
+    # ax.set_title(ylabel, # "tracer in " + region + " (mmol)", 
+    #                 fontsize=fs, loc=loc)
 
     
 

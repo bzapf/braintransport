@@ -44,7 +44,7 @@ only_significant = True
 
 latex_textwidth = 7.02352416667 # inches
 figwidth = latex_textwidth / 3
-figheight = figwidth * 0.75
+figheight = figwidth * 1 # 0.75
 
 size_inches = (figwidth, figheight)
 
@@ -74,7 +74,7 @@ ylabels =  ['Brain-wide (mmol)', 'Cerebral cortex (mmol)', 'Subcortical white\n 
 for roi, ylabel in zip(rois, ylabels):
 
     tracer_dict = {}
-    avg_tracer_dict = {}
+    # avg_tracer_dict = {}
 
     for pat in pats:
 
@@ -84,7 +84,7 @@ for roi, ylabel in zip(rois, ylabels):
 
         subfolder = pathlib.Path(path_to_files) / str(pat) / resultfoldername(pat) / "alpha1"
 
-        v = 1
+        roi_volume = 1
 
         if roi == "avgds":
             filename = 'region_areas.json'
@@ -95,6 +95,9 @@ for roi, ylabel in zip(rois, ylabels):
         with open(subfolder / filename) as f:
             region_volumes = json.load(f)
             roi_volume = region_volumes[roi] / 1e6
+
+
+        
 
         # if roi != "avgds":
         #     with open(path_to_files + str(pat) + '/region_volumes' + str(32), 'rb') as f:
@@ -120,8 +123,9 @@ for roi, ylabel in zip(rois, ylabels):
 
         assert max(t) < 2.5 * 24 * 3600
 
-        total_tracer = exceltable[roi] * v
-        average_tracer = exceltable[roi]
+        total_tracer = exceltable[roi] * roi_volume
+        
+        # average_tracer = exceltable[roi]
 
         if pat in sleepers:
             c = "blue"
@@ -130,7 +134,9 @@ for roi, ylabel in zip(rois, ylabels):
             c = "red"
 
         ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer, intervals=intervals)
-        _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer, intervals=intervals)
+        # _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer, intervals=intervals)
+
+        
 
         tracer_dict[pat] = tracer_at_times.tolist()
 
@@ -139,42 +145,44 @@ for roi, ylabel in zip(rois, ylabels):
         else:
             tracer_dict[pat] = tracer_dict[pat] + ["no sleep"]
 
-        avg_tracer_dict[pat] = avg_tracer_at_times.tolist()
+        # avg_tracer_dict[pat] = avg_tracer_at_times.tolist()
 
-        if pat in sleepers:
-            avg_tracer_dict[pat] = avg_tracer_dict[pat] + ["sleep"]
-        else:
-            avg_tracer_dict[pat] = avg_tracer_dict[pat] + ["no sleep"]
+        # if pat in sleepers:
+        #     avg_tracer_dict[pat] = avg_tracer_dict[pat] + ["sleep"]
+        # else:
+        #     avg_tracer_dict[pat] = avg_tracer_dict[pat] + ["no sleep"]
 
     patdf = pd.DataFrame.from_dict(tracer_dict).transpose()
 
-    avg_tracer_dict= pd.DataFrame.from_dict(avg_tracer_dict).transpose()
+    # avg_tracer_dict= pd.DataFrame.from_dict(avg_tracer_dict).transpose()
 
     if type(patdf.iloc[0, patdf.columns[-1]]) is str:
         patdf = patdf.loc[:, :(patdf.columns[-1]-1)]
     
-    if type(avg_tracer_dict.iloc[0, avg_tracer_dict.columns[-1]]) is str:
-        avg_tracer_dict = avg_tracer_dict.loc[:, :(avg_tracer_dict.columns[-1]-1)]
+    # if type(avg_tracer_dict.iloc[0, avg_tracer_dict.columns[-1]]) is str:
+    #     avg_tracer_dict = avg_tracer_dict.loc[:, :(avg_tracer_dict.columns[-1]-1)]
 
     print("------------------------------------------------------------------------------")
     print("Total amount of tracer in " + roi + ", averaged over all subjects:")
     for i in range(1, 4):
         y = patdf[i]
 
-        avg_tracer_at_i = avg_tracer_dict[i]
+        # avg_tracer_at_i = avg_tracer_dict[i]
 
         mean, std = np.nanmean(y), np.nanstd(y)
 
         print("time", intervals[i], "total tracer  ", format(mean, ".4f"),  "pm", format(std, ".4f"), "mmol", 
             "(", format(mean * 100 / 0.5, ".0f"),  "pm", format(std * 100 / 0.5, ".0f"), " percent)")
     
-        mean, std = np.nanmean(avg_tracer_at_i), np.nanstd(avg_tracer_at_i)
-        print("time", intervals[i], "average tracer", format(mean, ".2f"),  "pm", format(std, ".2f"), "mmol / L", )
+        # mean, std = np.nanmean(avg_tracer_at_i), np.nanstd(avg_tracer_at_i)
+        # print("time", intervals[i], "average tracer", format(mean, ".2f"),  "pm", format(std, ".2f"), "mmol / L", )
     
     print("------------------------------------------------------------------------------")
 
     means = np.mean(patdf, axis=0)
     means_arr = np.array(patdf).astype(float)
+
+    # breakpoint()
 
     nan_policy = "omit"
 
@@ -184,16 +192,20 @@ for roi, ylabel in zip(rois, ylabels):
     # cns = "tab:red"
 
     if roi == "white":
-        cs = np.array([0.45176471, 0.76708958, 0.46120723, 1.        ])
+        # cs = np.array([0.45176471, 0.76708958, 0.46120723, 1.        ])
         edgecolor = None
+        cs = "white"
+        edgecolor = "k"
 
     elif roi == "gray":
         cs = np.array([0.41708574, 0.68063053, 0.83823145, 1.        ])
         edgecolor = None
 
+        cs = "gray"
+
     else:
-        cs = "white"
-        edgecolor = "k"
+        cs = "dimgrey"
+        edgecolor = None # "k"
 
     x = np.arange(len(labels))
 

@@ -37,7 +37,7 @@ imageformat = ".png"
 FS = 36
 
 dpi = 400
-figsize = (12, 8)
+figsize = (12, 12)
 
 if "cluster" not in os.getcwd():
     matplotlib.rcParams["lines.linewidth"] = 2
@@ -54,12 +54,12 @@ fs = None
 paperformat = True
 
 
-GREY_WHITE=False
+GREY_WHITE=True
 
 plotname = ""
 
-if GREY_WHITE:
-    plotname = "Grey-White"
+# if GREY_WHITE:
+#     plotname = "Grey-White"
 
 
 print_format=".4f"
