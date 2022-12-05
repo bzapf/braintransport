@@ -133,7 +133,7 @@ for roi, ylabel in zip(rois, ylabels):
         else:
             c = "red"
 
-        ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=total_tracer, intervals=intervals)
+        ts, tracer_at_times = get_data_in_intervals(pat, stored_times=t / 3600, stored_data=total_tracer, intervals=intervals)
         # _, avg_tracer_at_times = get_data_in_intervals(pat, stored_times=t, stored_data=average_tracer, intervals=intervals)
 
         
@@ -195,7 +195,7 @@ for roi, ylabel in zip(rois, ylabels):
     if roi == "white":
         # cs = np.array([0.45176471, 0.76708958, 0.46120723, 1.        ])
         edgecolor = None
-        cs = "white"
+        cs = "gainsboro" # "white"
         edgecolor = "k"
 
     elif roi == "gray":
