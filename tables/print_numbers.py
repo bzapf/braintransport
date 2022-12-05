@@ -28,7 +28,7 @@ def read_data():
     for alpha in range(1, 6):
         alpha = str(alpha)
 
-        for roi in ["avg", "gray", "white"]:
+        for roi in ["avg", "gray", "white", "brainstem"]:
 
             measured_c = {}
             simulated_c = {}
@@ -107,6 +107,11 @@ if __name__ == "__main__":
         print(regions[roi], "tracer in interval", time_idx, meanformat(mri_dataframes[(roi, "1")][time_idx]), "mmol")
         print(regions[roi], "tracer in interval", time_idx, percentformat(mri_dataframes[(roi, "1")][time_idx]), "%")
         print()
+        
+        # Sanity check: total concentration should be roughly gray + white + brainstem
+        total = mri_dataframes[("avg", "1")][time_idx] 
+        subregion_sum = mri_dataframes[("gray", "1")][time_idx] + mri_dataframes[("brainstem", "1")][time_idx] + mri_dataframes[("white", "1")][time_idx]
+        assert np.mean(np.abs(total- subregion_sum)) < 1e-6
 
     del time_idx
 
