@@ -22,23 +22,25 @@ def get_data_in_intervals(pat, stored_times, stored_data, intervals):
 
     assert len(stored_data) < 12, "this function should only be called with experimental data"
     assert len(stored_times) < 12, "this function should only be called with experimental data"
+    
 
-    if max(stored_times) < 80:
-        message = "Assuming times are in hours"
-        if message not in print_messages:
-            print(message)
+    # if max(stored_times) < 80:
+    #     message = "Assuming times are in hours"
+    #     if message not in print_messages:
+    #         print(message)
 
-        print_messages.append(message)
+    #     print_messages.append(message)
         
-        stored_times = stored_times * 3600
+    #     stored_times = stored_times * 3600
 
+    assert np.nanmax(stored_times) < 80
 
     for idy, (tmin, tmax) in enumerate(intervals):
         for idx, (ti, datapoint) in enumerate(zip(stored_times, stored_data)):
-            if tmin <= ti / 3600 < tmax and len(ts) <= idy:
+            if tmin <= ti / 1 < tmax and len(ts) <= idy:
 
-                # print(pat, format(ti / 3600, ".1f"), "(tmin, tmax) =", tmin, tmax)
-                ts.append(ti / 3600)
+                # print(pat, format(ti / 1, ".1f"), "(tmin, tmax) =", tmin, tmax)
+                ts.append(ti / 1)
                 data.append(datapoint)
                 break
         
