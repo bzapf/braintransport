@@ -9,14 +9,11 @@ here = Path(__file__).parent
 import sys
 sys.path.insert(0, str(here.parent))
 
-from plots.definitions import groups, intervals, datafolder
+from plots.definitions import groups, intervals
 from plots.helpers import get_data_in_intervals, sim_at_mri_times
+import argparse
 
 pats = groups["all"]
-
-datafolder = pathlib.Path(datafolder)
-
-resfolder = "alphatests/alpha"
 
 header = ["(" + str(x[0]) + "," + str(x[1]) +")h" for x in intervals]
 
@@ -85,6 +82,21 @@ def maxformat(values):
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+
+    default_input_path = "/home/basti/Dropbox (UiO)/Sleep/"
+
+    parser.add_argument("--inputpath", type=str, default=default_input_path)
+
+    parserargs = parser.parse_args()
+    argparse_dict = vars(parserargs)
+
+    datafolder = argparse_dict["inputpath"]
+
+    datafolder = pathlib.Path(datafolder)
+
+    resfolder = "alphatests/alpha"
 
     sim_dataframes, mri_dataframes = read_data()
 
