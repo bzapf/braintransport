@@ -85,7 +85,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    default_input_path = "/home/basti/Dropbox (UiO)/Sleep/"
+    if "cluster" in os.getcwd():
+
+        default_input_path = "/cluster/projects/nn9279k/bastian/SleepData/"
+
+    else:
+        default_input_path = "/home/basti/Dropbox (UiO)/Sleep/"
 
     parser.add_argument("--inputpath", type=str, default=default_input_path)
 
