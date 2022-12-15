@@ -696,7 +696,7 @@ if __name__ == "__main__":
 
     os.chdir(path_to_files)
 
-    FS = 35
+    FS = 40
 
     dpi = 400
     figsize = (10, 10)
@@ -833,7 +833,7 @@ if __name__ == "__main__":
 
     print("median alpha", format(np.median(df2["alpha"]), ".1f"), "pm", format(np.std(df2["alpha"]), ".1f"))
     print("median r", format(np.median(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
-    print("median half live", format(np.median(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
+    print("median half life", format(np.median(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
 
 
     print("min alpha", format(np.min(df2["alpha"]), ".1f"), " max ", format(np.max(df2["alpha"]), ".1f"))
@@ -847,10 +847,7 @@ if __name__ == "__main__":
     # barplot(qty="r_d", qtyname="r", savepath=figurepath +"r.png", twinax=False, dpi=dpi, figsize=figsize)
     # barplot(qty="alpha", qtyname=r"\alpha", savepath=figurepath + "alpha.png", twinax=False, dpi=dpi, figsize=figsize)
 
-    alphas = [1, np.nan]
 
-    if np.nan in alphas:
-        suffix = "best"
     paperformat = True
 
     pats.remove("091")
@@ -873,7 +870,7 @@ if __name__ == "__main__":
 
     fig2, ax2 = plt.subplots(figsize=figsize, dpi=dpi)
 
-    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+    # fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
 
     bestalpha, bestr = [], []
 
@@ -885,17 +882,26 @@ if __name__ == "__main__":
         bestalpha.append(data["alpha_final"])
         bestr.append(data["r_d_final"])
 
-        ax.plot([0,1], [data["alpha_final"], 1e5 * data["r_d_final"]], marker="o")
+        # ax.plot([0,1], [data["alpha_final"], 1e5 * data["r_d_final"]], marker="o")
 
 
-        ax2.plot(data["alpha_final"], pers2permin * data["r_d_final"], marker="o", markersize=20    )
+        ax2.plot(data["alpha_final"], pers2permin * data["r_d_final"], marker="o", markersize=20, color="darkred")
 
-    ax.set_xlim(-0.1, 1.1)
-    ax.tick_params(axis='x', width=0)
-    ax.tick_params(axis='y', labelsize=fs)
-    plt.xticks([0, 1], [r"$\alpha$", "$r \, (10^{-5}$s$^{-1}$)" ], fontsize=FS)
-    plt.yticks([1, 3, 5, 7, 9])
-    plt.tight_layout()
+    # ax.set_xlim(-0.1, 1.1)
+    # ax.tick_params(axis='x', width=0)
+    # ax.tick_params(axis='y', labelsize=fs)
+    # plt.xticks([0, 1], [r"$\alpha$", "$r \, (10^{-5}$s$^{-1}$)" ], fontsize=FS)
+    # plt.yticks([1, 3, 5, 7, 9])
+    ax2.spines.right.set_visible(False)
+    ax2.spines.top.set_visible(False)
+
+    # Only show ticks on the left and bottom spines
+    ax2.yaxis.set_ticks_position('left')
+    ax2.xaxis.set_ticks_position('bottom')
+
+
+    
+    # plt.tight_layout()
     plt.savefig(plotpath + "bests.png", dpi=400)
     
 
@@ -908,25 +914,37 @@ if __name__ == "__main__":
     #ax2.tick_params(axis='x', width=0)
     # ax2.tick_params(axis='y', labelsize=fs)
 
-    # x = np.linspace(min(bestalpha), max(bestalpha), 100)
-    # y = np.mean(bestr) + test[0] * np.std(bestalpha) * np.std(bestr) * (x - np.mean(bestalpha))
-    # plt.plot(x, pers2permin * y, color="k", label='$r=$' + format(test[0], ".2f") + "\n$p=$" + format(test[1], ".2e"))
+    x = np.linspace(min(bestalpha), max(bestalpha), 100)
+    y = np.mean(bestr) + test[0] * np.std(bestalpha) * np.std(bestr) * (x - np.mean(bestalpha))
+    plt.plot(x, pers2permin * y, color="k", label='$r=$' + format(test[0], ".2f") + ", $p=$" + format(test[1], ".2f"))
     
     plt.xticks(range(1,8))
-    # plt.yticks([1, 3, 5, 7, 9])
+    
+    plt.yticks(np.array(range(1, 8)) * 10)
+    
     plt.xlabel(r"best $\alpha$", fontsize=FS)
     plt.ylabel("best $r \, (10^{-4}$min$^{-1}$)", fontsize=FS)
 
     # plt.title('Correlation r=' + format(test[0], ".2f"), fontsize=FS)
     
-    # plt.legend()
-    plt.tight_layout()
+    plt.legend(loc="upper left", 
+            bbox_to_anchor=(0., 1.0, 1., .07),
+            fontsize=matplotlib.rcParams["legend.fontsize"]-2)
+    dw = 0.04
+
+    plt.tight_layout(rect=[-dw, -dw, 1 + dw, 1 + dw])
 
     plt.savefig(plotpath + "bestscorrelation.png", dpi=400)
     
     # plt.show()
 
-    exit()
+    # exit()
+
+    alphas = [1, np.nan]
+
+    if np.nan in alphas:
+        suffix = "best"
+
 
     GREY_WHITE = False
 

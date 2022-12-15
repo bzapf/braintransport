@@ -113,7 +113,7 @@ def make_figs(region, pats, alphas, data_folder, average_tracer=False):
 
 
 def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, data_folder, savepath: Union[None, str], FS, figsize, dpi, ylabel, 
-                GREY_WHITE=False, width: float = None, print_format: str = ".2f", maxplotalpha=6,
+                GREY_WHITE=False, width: float = None, print_format: str = ".2f", maxplotalpha=None,
                 average_tracer=False):
 
 
@@ -299,7 +299,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         if maxplotalpha == 2:
             label = "simulation"
 
-        if alpha < maxplotalpha:
+        if (maxplotalpha is None) or alpha < maxplotalpha:
 
 
             ax.bar(x_sim[i::(len(alphas))], 
@@ -342,7 +342,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         # plt.xlim(-1, 26)#-1.85, 27.85)
 
     if np.nan in alphas:
-        plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2)
+        plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-4)
 
 
 
@@ -355,13 +355,13 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
         ax.xaxis.set_ticks_position('bottom')
 
     if maxplotalpha == 2:
-        plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2, frameon=True)
+        plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-4, frameon=True)
 
     if len(alphas) > 3 and maxplotalpha == 6:
        
         if region == "avg":
 
-            plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2, frameon=True)
+            plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-4, frameon=True)
             # old version:
             dydx = np.zeros(10)
             cmap_name = 'my_list'
@@ -380,7 +380,7 @@ def make_barplot(region, pats, alphas, paperformat, resultfoldername: Callable, 
             cbar.ax.set_yticks([1, 3, 5])
         
         elif not GREY_WHITE:
-            plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-2, frameon=False, loc="upper left")
+            plt.legend(fontsize=matplotlib.rcParams["legend.fontsize"]-4, frameon=False, loc="upper left")
             
             cbaxes = inset_axes(ax, width="40%", height="4%", 
                 loc="upper left",

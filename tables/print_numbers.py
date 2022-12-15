@@ -17,7 +17,7 @@ pats = groups["all"]
 
 header = ["(" + str(x[0]) + "," + str(x[1]) +")h" for x in intervals]
 
-def read_data():
+def read_data(average=False):
 
     sim_dataframes = {}
     mri_dataframes = {}
@@ -46,9 +46,10 @@ def read_data():
                 volumes = json.load(open(datafolder / pat / (resfolder + alpha) / "region_volumes.json"))
 
                 del simulationcsv, measuredcsv, simt, simd
-
-                simdata *= volumes[roi] / 1e6
-                mridata *= volumes[roi] / 1e6
+                
+                if not average:
+                    simdata *= volumes[roi] / 1e6
+                    mridata *= volumes[roi] / 1e6
 
                 measured_c[pat] = mridata
                 simulated_c[pat] = simdata
@@ -77,8 +78,11 @@ def percentformat(values):
 
 def maxformat(values):
     # print(dataframe)
-        return format(np.nanmax(values), mmol_digits)
+    return format(np.nanmax(values), mmol_digits)
 
+def minformat(values):
+    # breakpoint()
+    return format(np.nanmin(np.nanmax(values, axis=1)), mmol_digits)
 
 
 if __name__ == "__main__":
@@ -104,6 +108,8 @@ if __name__ == "__main__":
     resfolder = "alphatests/alpha"
 
     sim_dataframes, mri_dataframes = read_data()
+
+    sim_avg_dataframes, mri_avg_dataframes = read_data(average=True)
 
     #####################
 
@@ -135,6 +141,18 @@ if __name__ == "__main__":
     roi = "white"
     print(regions[roi], "max tracer in (0, 48) h", maxformat(mri_dataframes[(roi, "1")]), "mmol")
 
+    time_idx = header[-2]
+    print()
+    print(regions[roi], "group mean avg tracer at", time_idx, meanformat(mri_avg_dataframes[(roi, "1")][time_idx]), "mmol / L")
+    print(regions[roi], "max peak avg tracer in (0, 48) h", maxformat(mri_avg_dataframes[(roi, "1")]), "mmol / L")
+    print(regions[roi], "min peak avg tracer in (0, 48) h", minformat(mri_avg_dataframes[(roi, "1")]), "mmol / L")
+    roi = "gray"
+    print()
+    print(regions[roi], "group mean avg tracer at", time_idx, meanformat(mri_avg_dataframes[(roi, "1")][time_idx]), "mmol / L")
+    print(regions[roi], "max peak avg tracer in (0, 48) h", maxformat(mri_avg_dataframes[(roi, "1")]), "mmol / L")
+    print(regions[roi], "min peak avg tracer in (0, 48) h", minformat(mri_avg_dataframes[(roi, "1")]), "mmol / L")
+
+    del time_idx
     ###############################################################################################################################
 
     # After $\sim$6 hours, more tracer is observed clinically than diffusion simulations predict both in the cerebral cortex 
