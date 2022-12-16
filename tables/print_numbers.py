@@ -3,7 +3,7 @@ import numpy as np
 import pandas
 
 import sys
-
+import scipy
 from pathlib import Path
 here = Path(__file__).parent
 import sys
@@ -244,6 +244,37 @@ if __name__ == "__main__":
     #  Moreover, tracer concentrations in the subcortical white matter at 48 hours are overestimated by more than $3\times$. 
 
         
+    print("Numbers for 'Tracer clearance by advection is reduced in sleep deprivation group.'")
+
+    roi = "avg"
+    time_idx = header[1]
+    print(regions[roi], "Sleep group, measured tracer in interval", ":", time_idx, 
+        meanformat(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]]), "mmol")
+    print(regions[roi], "Sleep deprivation group, measured tracer in interval", ":", time_idx, 
+        meanformat(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]]), "mmol")
+    stat, pval = scipy.stats.ttest_ind(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]], 
+                mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]], axis=0, equal_var=True, nan_policy="omit")
+    print("Students's t-test, p=", pval)
+    
+
+    time_idx = header[-1]
+    print(regions[roi], "Sleep group, measured tracer in interval", ":", time_idx, 
+        meanformat(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]]), "mmol")
+    print(regions[roi], "Sleep deprivation group, measured tracer in interval", ":", time_idx, 
+        meanformat(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]]), "mmol")
 
 
+    stat, pval = scipy.stats.ttest_ind(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]], 
+                mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]], axis=0, equal_var=True, nan_policy="omit")
+    print("Students's t-test, p=", pval)
 
+    roi = "white"
+    time_idx = header[-1]
+    print(regions[roi], "Sleep group, measured tracer in interval,", ":", time_idx, 
+        meanformat(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]]), "mmol")
+    print(regions[roi], "Sleep deprivation group, measured tracer in interval", ":", time_idx, 
+        meanformat(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]]), "mmol")
+
+    stat, pval = scipy.stats.ttest_ind(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]], 
+                mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]], axis=0, equal_var=True, nan_policy="omit")
+    print("Students's t-test, p=", pval)

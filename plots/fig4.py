@@ -748,6 +748,18 @@ if __name__ == "__main__":
 
     df, dones = make_df()
 
+    df.to_csv(plotpath + "dframe.csv", index=True)
+
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("Values excluding pat 091")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    print("-------------------------------------------------------------------------------------------------------------------------------------")
+    
+    # breakpoint()
+    df = df.drop('091')
+    groups["sleep"].remove("091")
+    
     print(df)
 
     print("average red.", df["red. in J (%)"].mean(), "+-", np.std(df["red. in J (%)"]))
@@ -765,6 +777,9 @@ if __name__ == "__main__":
     sleepdep = [x for x in groups["sleepdep"] if x in dones]
 
     dfs = df.loc[sleep]
+    dfsdep = df.loc[sleepdep]
+    
+    dfs = df.loc[[x for x in sleep if x != "091"]]
     dfsdep = df.loc[sleepdep]
 
     for idx, qty in enumerate(["alpha", "r_d"]):
@@ -789,55 +804,25 @@ if __name__ == "__main__":
 
 
     print("mean alpha", format(np.mean(df["alpha"]), ".1f"), "pm", format(np.std(df["alpha"]), ".1f"))
-    print("mean r", format(np.mean(df["r_d"]), ".0f"), "pm", format(np.std(df["r_d"]), ".0f"))
+    print("mean r", format(np.mean(df["r_d"]), ".0f"), "pm", format(np.std(df["r_d"]), ".0f"), " (10^-4 / min)")
 
-    df.to_csv(plotpath + "dframe.csv", index=True)
+    print("median alpha", format(np.median(df["alpha"]), ".1f"), "pm", format(np.std(df["alpha"]), ".1f"))
+    print("median r", format(np.median(df["r_d"]), ".0f"), "pm", format(np.std(df["r_d"]), ".0f"), " (10^-4 / min)")
+    print("median half life", format(np.median(r2halflife(df["r_d"])) / 3600, ".0f"), "pm", 
+            format(np.std(r2halflife(df["r_d"])) / 3600, ".0f"), " (hours)")
+    print("median half life", format(np.median(r2halflife(df["r_d"])) / 60, ".0f"), "pm", 
+            format(np.std(r2halflife(df["r_d"])) / 60, ".0f"), " (minutes)")
 
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    print("Values excluding pat 091")
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    
-    # breakpoint()
-    df2 = df.drop('091')
-    
-    del df
-
-    dfs = df2.loc[[x for x in sleep if x != "091"]]
-    dfsdep = df2.loc[sleepdep]
-
-    for idx, qty in enumerate(["alpha", "r_d"]):
-
-        print(qty, ",Sleep vs non sleep")
-        fac = 1
-        if qty not in ["alpha"]:
-            fac = 1
-        print(qty, "(Sleep group)            ", format(np.mean(dfs[qty] * fac), ".2f"), "+-", format(np.std(dfs[qty] * fac), ".2f"))
-        if qty not in ["alpha", "rd/rn"]:
-            print("half life", "(Sleep group)", format(np.median(r2halflife(dfs[qty])/3600), ".2f"), "+-", 
-                format(np.std(r2halflife(dfs[qty])/3600), ".2f"), "(hours)")
-
-        print(qty, "(Sleep deprivation group)", format(np.mean(dfsdep[qty] * fac), ".2f"), "+-", 
-            format(np.std(dfsdep[qty] * fac), ".2f"))
-        # r2halflife(r)
-        if qty not in ["alpha", "rd/rn"]:
-            print("half life", "(Sleep deprivation group)", format(np.median(r2halflife(dfsdep[qty])/3600), ".2f"), "+-", 
-                format(np.std(r2halflife(dfsdep[qty])/3600), ".2f"), "(hours)")
-        _, pval = scipy.stats.ttest_ind(dfs[qty], dfsdep[qty], axis=0, equal_var=True, nan_policy="omit")
-        print("t-test, p =", format(pval, ".3f"))
+    print("mean half life", format(np.mean(r2halflife(df["r_d"])) / 3600, ".0f"), "pm", 
+            format(np.std(r2halflife(df["r_d"])) / 3600, ".0f"), " (hours)")
+    print("mean half life", format(np.mean(r2halflife(df["r_d"])) / 60, ".0f"), "pm", 
+            format(np.std(r2halflife(df["r_d"])) / 60, ".0f"), " (minutes)")
+    print("mean half life", format(r2halflife(np.mean(df["r_d"])) / 60, ".0f"), "pm", 
+            format(np.std(r2halflife(df["r_d"])) / 60, ".0f"), " (minutes)")
 
 
-    print("mean alpha", format(np.mean(df2["alpha"]), ".1f"), "pm", format(np.std(df2["alpha"]), ".1f"))
-    print("mean r", format(np.mean(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
-
-    print("median alpha", format(np.median(df2["alpha"]), ".1f"), "pm", format(np.std(df2["alpha"]), ".1f"))
-    print("median r", format(np.median(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
-    print("median half life", format(np.median(df2["r_d"]), ".0f"), "pm", format(np.std(df2["r_d"]), ".0f"))
-
-
-    print("min alpha", format(np.min(df2["alpha"]), ".1f"), " max ", format(np.max(df2["alpha"]), ".1f"))
-    print("min r", format(np.min(df2["r_d"]), ".0f"), " max ", format(np.max(df2["r_d"]), ".0f"))
+    print("min alpha", format(np.min(df["alpha"]), ".1f"), " max ", format(np.max(df["alpha"]), ".1f"))
+    print("min r", format(np.min(df["r_d"]), ".0f"), " max ", format(np.max(df["r_d"]), ".0f"), " (10^-4 / min)")
 
     del dfs   
 
@@ -850,14 +835,6 @@ if __name__ == "__main__":
 
     paperformat = True
 
-    pats.remove("091")
-
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    print("Creating plots excluding pat 091")
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    print("-------------------------------------------------------------------------------------------------------------------------------------")
-    
     # make_figs(region="white", pats=pats, alphas=alphas, data_folder=datafolder, average_tracer=False)
 
     width = 0.8 + 0.1
