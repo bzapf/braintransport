@@ -817,7 +817,7 @@ if __name__ == "__main__":
             format(np.std(r2halflife(df["r_d"])) / 3600, ".0f"), " (hours)")
     print("mean half life", format(np.mean(r2halflife(df["r_d"])) / 60, ".0f"), "pm", 
             format(np.std(r2halflife(df["r_d"])) / 60, ".0f"), " (minutes)")
-    print("mean half life", format(r2halflife(np.mean(df["r_d"])) / 60, ".0f"), "pm", 
+    print("mean half life (computed wrong)", format(r2halflife(np.mean(df["r_d"])) / 60, ".0f"), "pm", 
             format(np.std(r2halflife(df["r_d"])) / 60, ".0f"), " (minutes)")
 
 
