@@ -25,7 +25,7 @@ def read_data(average=False):
     for alpha in range(1, 6):
         alpha = str(alpha)
 
-        for roi in ["avg", "gray", "white", "brainstem"]:
+        for roi in ["avg", "gray", "white", "brainstem", "avgds"]:
 
             measured_c = {}
             simulated_c = {}
@@ -43,7 +43,10 @@ def read_data(average=False):
 
                 simtimes, simdata = get_data_in_intervals(pat, stored_times=simt, stored_data=simd, intervals=intervals)
 
-                volumes = json.load(open(datafolder / pat / (resfolder + alpha) / "region_volumes.json"))
+                if roi == "avgds":
+                    volumes = json.load(open(datafolder / pat / (resfolder + alpha) / "region_areas.json"))
+                else:
+                    volumes = json.load(open(datafolder / pat / (resfolder + alpha) / "region_volumes.json"))
 
                 del simulationcsv, measuredcsv, simt, simd
                 
@@ -237,6 +240,8 @@ if __name__ == "__main__":
                 ratioformat(values1=sim_dataframes[(roi, alpha)][time_idx], values2=mri_dataframes[(roi, alpha)][time_idx]))
 
 
+
+
     # In the subcortical white matter, similar observations hold (Fig.~\ref{fig:fig2}D).
     #  After 6 hours, \mer{all} simulations underestimate the amount of tracer, while after 24 hours, simulations 
     #  with $\alpha = 2$ overestimate the data by a factor $2.1 \pm 0.6$ ($0.029\pm 0.013$ vs $0.056\pm 0.022$ mmol) with increasing discrepancy 
@@ -278,3 +283,10 @@ if __name__ == "__main__":
     stat, pval = scipy.stats.ttest_ind(mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]], 
                 mri_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]], axis=0, equal_var=True, nan_policy="omit")
     print("Students's t-test, p=", pval)
+
+    print("Surface differences")
+    for time_idx in header:
+        roi = "avgds"
+        stat, pval = scipy.stats.ttest_ind(mri_avg_dataframes[(roi, alpha)][time_idx].loc[groups["sleep"]], 
+                    mri_avg_dataframes[(roi, alpha)][time_idx].loc[groups["sleepdep"]], axis=0, equal_var=True, nan_policy="omit")
+        print("Students's t-test, p=", pval)
