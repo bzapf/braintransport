@@ -183,6 +183,8 @@ def forward(context, write_solution=False, filename=None):
     U_prev = Function(V)
     U = Function(V)
 
+    normal = FacetNormal(mesh)
+
     dt = context.dt
     dx = context.dx
 
@@ -190,6 +192,20 @@ def forward(context, write_solution=False, filename=None):
     iter_k = 0
 
     if write_solution and store:
+
+        absrmfile = open('%s/absrm.txt' % context.outfolder, 'w')
+        absrmfile.write('t avg gray white brainstem ')
+
+        rmfile = open('%s/rm.txt' % context.outfolder, 'w')
+        rmfile.write('t avg gray white brainstem ')
+
+        rmfile.write('\n')
+        absrmfile.write('\n')
+
+        boundaryfile = open('%s/boundaryconcentration.txt' % context.outfolder, 'w')
+        boundaryfile.write('t avgds outflux ')
+
+        boundaryfile.write('\n')
 
         if filename == "plainstate":
             concfile = open('%s/concs_plain.txt' % context.outfolder, 'w')
@@ -231,6 +247,8 @@ def forward(context, write_solution=False, filename=None):
     # solver.set_operators(A, A)
 
     while not context.check_termination():
+        
+
 
         print("iter k", iter_k)
 
@@ -306,6 +324,51 @@ def forward(context, write_solution=False, filename=None):
         # solve(A, U.vector(), b, 'lu')
         
         context.update_objective(U)
+
+        if write_solution and store:
+
+            # rmfile.write('t avg gray white brainstem ')            
+            rmfile.write('%g ' % context.t)
+            
+            average = assemble((sol) * reaction_rate(context.delta_r_d) * dx)/Volume
+            gray_avg = assemble((sol) * reaction_rate(context.delta_r_d) * dx_SD(1))/gray_volume
+            white_avg = assemble((sol) * reaction_rate(context.delta_r_d) * dx_SD(2))/white_volume
+            brain_stem_avg = assemble((sol) * reaction_rate(context.delta_r_d) * dx_SD(3))/brain_stem_volume
+
+            rmfile.write('%g ' % average)
+            rmfile.write('%g ' % gray_avg)
+            rmfile.write('%g ' % white_avg)
+            rmfile.write('%g ' % brain_stem_avg)
+            rmfile.write('\n')
+
+
+            absrmfile.write('%g ' % context.t)
+            
+            average = assemble(abs(sol) * reaction_rate(context.delta_r_d) * dx)/Volume
+            gray_avg = assemble(abs(sol) * reaction_rate(context.delta_r_d) * dx_SD(1))/gray_volume
+            white_avg = assemble(abs(sol) * reaction_rate(context.delta_r_d) * dx_SD(2))/white_volume
+            brain_stem_avg = assemble(abs(sol) * reaction_rate(context.delta_r_d) * dx_SD(3))/brain_stem_volume
+
+            absrmfile.write('%g ' % average)
+            absrmfile.write('%g ' % gray_avg)
+            absrmfile.write('%g ' % white_avg)
+            absrmfile.write('%g ' % brain_stem_avg)
+            absrmfile.write('\n')
+
+
+            boundaryfile
+            boundaryfile.write('%g ' % context.t)
+            
+            average = assemble((sol) * ds) / Surface
+            
+            
+            diffusionoutflux = assemble(inner(grad(sol), normal) * ds) / Surface
+            
+            boundaryfile.write('%g ' % average)
+            boundaryfile.write('%g ' % diffusionoutflux)
+            boundaryfile.write('\n')
+
+            del average, gray_avg, white_avg, brain_stem_avg
 
     context.t = 0
     context.current_g_index = 0
@@ -612,6 +675,17 @@ if __name__ == "__main__":
         csv_c.to_csv(context.outfolder + '/concs_plain' + '.csv')
 
         csv_e.to_csv('%s/experimental_data.csv' % context.outfolder)
+
+        csv_c = pandas.read_csv(context.outfolder + '/rm' + '.txt', sep=' ', header=0)
+        csv_c.to_csv(context.outfolder + '/rm' + '.csv')
+
+        csv_c = pandas.read_csv(context.outfolder + '/absrm' + '.txt', sep=' ', header=0)
+        csv_c.to_csv(context.outfolder + '/absrm' + '.csv')
+
+        # boundaryconcentration
+
+        csv_c = pandas.read_csv(context.outfolder + '/boundaryconcentration' + '.txt', sep=' ', header=0)
+        csv_c.to_csv(context.outfolder + '/boundaryconcentration' + '.csv')
 
         if store:
             with open(outfolder + 'params', 'w') as outfile:

@@ -84,7 +84,7 @@ def print_table(phi_averages_6h, phi_averages_24h):
         
         A = pandas.DataFrame({"ID": subjects, "v (mum/min)": brain_wide,
                               "v_g": gray, "v_w": white, "v_s": stem})
-        print(A.to_latex())
+        print(A.to_latex(float_format="%.2f"))
     
 def main(phi_averages_6h, phi_averages_24h):
 

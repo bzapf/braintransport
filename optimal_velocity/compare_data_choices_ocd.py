@@ -79,7 +79,7 @@ for compare_t in timekeys:
     for pat in t1pats:
 
         if compare_t == "24h":
-            if pat == "191" or pat == "205":
+            if pat in ["191", "172", "205"]:
                 print("Exclude", pat)
                 continue
 
