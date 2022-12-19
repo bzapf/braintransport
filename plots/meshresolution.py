@@ -7,7 +7,7 @@ import pandas as pd
 
 from definitions import datafolder, intervals
 
-from helpers import get_data_in_intervals
+from helpers import extract_data, get_data_in_intervals, sim_at_mri_times
 
 pat = "205"
 pat = "105"
@@ -112,23 +112,34 @@ for pat in ["105", "205"]:
                 assert c16 is None
                 c16 = exceltable["avg"]
 
-                _, c16intervals = get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)
+
+                simulation_times, simulated_tracer_at_times = sim_at_mri_times(pat, mritimes=experimentaltable["t"] / 3600, simdata=exceltable["avg"], simtimes=exceltable["t"] / 3600)    
+
+                
+                _, c16intervals = get_data_in_intervals(pat="205", stored_times=simulation_times, stored_data=simulated_tracer_at_times, intervals=intervals)
+                # breakpoint()
 
             if int(key[0]) == 32 and int(key[1]) == 144:
                 assert c32 is None
                 c32 = exceltable["avg"]
 
-                _, c32intervals = get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)
+                simulation_times, simulated_tracer_at_times = sim_at_mri_times(pat, mritimes=experimentaltable["t"] / 3600, simdata=exceltable["avg"], simtimes=exceltable["t"] / 3600)    
 
+                
+                _, c32intervals = get_data_in_intervals(pat="205", stored_times=simulation_times, stored_data=simulated_tracer_at_times, intervals=intervals)
             if int(key[0]) == 64 and int(key[1]) == 144:
                 assert c64 is None
                 c64 = exceltable["avg"]
-                _, c64intervals = get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)
+
+                simulation_times, simulated_tracer_at_times = sim_at_mri_times(pat, mritimes=experimentaltable["t"] / 3600, simdata=exceltable["avg"], simtimes=exceltable["t"] / 3600)    
+
+                
+                _, c64intervals = get_data_in_intervals(pat="205", stored_times=simulation_times, stored_data=simulated_tracer_at_times, intervals=intervals)
 
             if int(key[0]) == 64:
-                c48_list64.append(get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)[1])
+                c48_list64.append(c64intervals[1])
             if int(key[0]) == 32:
-                c48_list32.append(get_data_in_intervals(pat="205", simtimes=exceltable["t"], simdata=exceltable["avg"], intervals=intervals)[1])
+                c48_list32.append(c32intervals[1])
 
             if int(key[1]) == 96:
 
@@ -169,7 +180,7 @@ for pat in ["105", "205"]:
 
     l2diff48 = ((np.array(c48_list32)-np.array(c48_list64))**2) / (np.array(c48_list64)**2)
     print("Maximum rel. difference at 48", np.max(l2diff48))
-    plt.title("Simulated gadobutrol concentration", fontsize=fs)
+    # plt.title("Simulated gadobutrol concentration", fontsize=fs)
     plt.xlabel("Time (hours)", fontsize=fs)
     plt.ylabel("Brain-wide (mmol / L)", fontsize=fs)
     plt.xticks(fontsize=fs)

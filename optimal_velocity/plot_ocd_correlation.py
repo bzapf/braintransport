@@ -3,6 +3,7 @@ import pylab
 import matplotlib
 import pandas
 import seaborn as sns
+import numpy as np
 import scipy
 from collections import OrderedDict
 import matplotlib.pyplot as plt
@@ -117,11 +118,16 @@ if __name__ == "__main__":
 
         plt.figure()
         # label = r + ", r="+ format(test[0], ".2f")
-        plt.title(r + ", r = "+ format(test[0], ".2f"))
+        plt.title(r) #  + ", r = "+ format(test[0], ".2f"))
         plt.plot(A,B, marker="o", linewidth=0, color="k")
-        plt.xlabel("$|\overline{v}|$" + " (6 -> 24 h)")
-        plt.ylabel("$|\overline{v}|$" + " (24 -> 48 h)")
 
+        x = np.linspace(min(A), max(A), 100)
+        y = np.mean(B) + test[0] * np.std(A) * np.std(B) * (x - np.mean(A))
+        plt.plot(x, y, color="k", label='$r=$' + format(test[0], ".2f") + ", $p=$" + format(test[1], ".2f"))
+
+        plt.xlabel("$|\overline{v}|$" + " (6 -> 24 h) ($\mu$m/min)")
+        plt.ylabel("$|\overline{v}|$" + " (24 -> 48 h) ($\mu$m/min)")
+        plt.legend()
         plt.tight_layout()
 
         plt.savefig("/home/basti/Dropbox (UiO)/Apps/Overleaf (1)/Brain influx and clearance during sleep and sleep deprivation/figures/simulations/"

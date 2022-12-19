@@ -190,7 +190,7 @@ def extract_data(alphas, pats, data_folder, resultfoldername: Callable, region, 
             experimental_times , measured_tracer_at_times = get_data_in_intervals(pat, stored_times=experimental_times, stored_data=measured_tracer, intervals=intervals)
 
             # print(experimental_times, simulation_times)
-            simulation_times, simulated_tracer_at_times = sim_at_mri_times(pat, mritimes=experimental_times, simdata=simulated_tracer, simtimes=simulation_times)    
+                
 
             # simulation_times, simulated_tracer_at_times = get_data_in_intervals(pat, stored_times=simulation_times, stored_data=simulated_tracer, intervals=intervals)
 
